@@ -17,6 +17,7 @@ A collection of useful macOS Finder Quick Actions (Automator workflows) that are
 | Workflow | Description | Requirements |
 |----------|-------------|--------------|
 | [Remove Nano Banana Watermark](workflows/remove-nano-banana-watermark/) | Removes the sparkle watermark from Nano Banana AI-generated images | Python 3, Pillow |
+| [Resize to w1024px](workflows/resize-to-w1024px/) | Resizes images to 1024px width, keeping aspect ratio. Skips smaller images | None (built-in `sips`) |
 
 ## Quick Install
 
