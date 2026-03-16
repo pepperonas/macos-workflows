@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AMApplicationBuild</key>
+	<string>534</string>
+	<key>AMApplicationVersion</key>
+	<string>2.10</string>
+	<key>AMDocumentVersion</key>
+	<string>2</string>
+	<key>actions</key>
+	<array>
+		<dict>
+			<key>action</key>
+			<dict>
+				<key>AMAccepts</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Optional</key>
+					<true/>
+					<key>Types</key>
+					<array>
+						<string>com.apple.cocoa.string</string>
+					</array>
+				</dict>
+				<key>AMActionVersion</key>
+				<string>2.0.3</string>
+				<key>AMApplication</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>AMParameterProperties</key>
+				<dict>
+					<key>COMMAND_STRING</key>
+					<dict/>
+					<key>CheckedForUserDefaultShell</key>
+					<dict/>
+					<key>inputMethod</key>
+					<dict/>
+					<key>shell</key>
+					<dict/>
+					<key>source</key>
+					<dict/>
+				</dict>
+				<key>AMProvides</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Types</key>
+					<array>
+						<string>com.apple.cocoa.string</string>
+					</array>
+				</dict>
+				<key>ActionBundlePath</key>
+				<string>/System/Library/Automator/Run Shell Script.action</string>
+				<key>ActionName</key>
+				<string>Run Shell Script</string>
+				<key>ActionParameters</key>
+				<dict>
+					<key>COMMAND_STRING</key>
+					<string>export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin"
+python3 -c '
+import sys, textwrap, subprocess, re
+
+MAX_WIDTH = 40
+
+def is_table_line(s):
+    return bool(re.search(r"[│┌┐├┤└┘┬┴┼╌─═╔╗╚╝╠╣╦╩╬]", s))
+
+def is_border_line(s):
+    return bool(re.match(r"^[\s│┌┐├┤└┘┬┴┼╌─═╔╗╚╝╠╣╦╩╬]+$", s.strip()))
+
+def parse_cells(line):
+    parts = re.split(r"│", line)
+    cells = [p.strip() for p in parts]
+    if cells and not cells[0]: cells = cells[1:]
+    if cells and not cells[-1]: cells = cells[:-1]
+    return cells
+
+def format_table(block):
+    data_rows = []
+    for line in block:
+        if is_border_line(line): continue
+        if "│" in line:
+            data_rows.append(parse_cells(line))
+    if not data_rows: return block
+    headers = data_rows[0]
+    body = data_rows[1:] if len(data_rows) > 1 else []
+    out = []
+    for row in body:
+        for i, cell in enumerate(row):
+            if not cell: continue
+            h = headers[i] if i &lt; len(headers) else f"#{i+1}"
+            line = f"{h}: {cell}"
+            if len(line) &lt;= MAX_WIDTH:
+                out.append(line)
+            else:
+                wrapped = textwrap.fill(cell,
+                    width=MAX_WIDTH,
+                    initial_indent=f"{h}: ",
+                    subsequent_indent="  ",
+                    break_long_words=False,
+                    break_on_hyphens=False)
+                out.append(wrapped)
+        out.append("")
+    if out and out[-1] == "": out.pop()
+    return out
+
+text = sys.stdin.read()
+lines = text.split("\n")
+result = []
+i = 0
+while i &lt; len(lines):
+    stripped = lines[i].rstrip()
+    if is_table_line(stripped):
+        block = [stripped]
+        i += 1
+        while i &lt; len(lines) and is_table_line(lines[i].rstrip()):
+            block.append(lines[i].rstrip())
+            i += 1
+        result.extend(format_table(block))
+        continue
+    if not stripped:
+        result.append("")
+        i += 1
+        continue
+    m = re.match(r"^(\s*(?:[-*+]\s+|\d+\.\s+|#{1,6}\s+)?)", stripped)
+    prefix = m.group(1) if m else ""
+    if len(stripped) &lt;= MAX_WIDTH:
+        result.append(stripped)
+        i += 1
+        continue
+    content = stripped[len(prefix):]
+    subsequent_indent = prefix if prefix.strip() else prefix
+    if prefix.strip():
+        subsequent_indent = " " * len(prefix)
+    wrapped = textwrap.fill(content, width=MAX_WIDTH,
+        initial_indent=prefix, subsequent_indent=subsequent_indent,
+        break_long_words=False, break_on_hyphens=False)
+    result.append(wrapped)
+    i += 1
+
+output = "\n".join(result)
+proc = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE)
+proc.communicate(output.encode("utf-8"))
+' &lt;&lt;&lt; "$(cat)"</string>
+					<key>CheckedForUserDefaultShell</key>
+					<true/>
+					<key>inputMethod</key>
+					<integer>0</integer>
+					<key>shell</key>
+					<string>/bin/zsh</string>
+					<key>source</key>
+					<string></string>
+				</dict>
+				<key>BundleIdentifier</key>
+				<string>com.apple.RunShellScript</string>
+				<key>CFBundleVersion</key>
+				<string>2.0.3</string>
+				<key>CanShowSelectedItemsWhenRun</key>
+				<false/>
+				<key>CanShowWhenRun</key>
+				<true/>
+				<key>Category</key>
+				<array>
+					<string>AMCategoryUtilities</string>
+				</array>
+				<key>Class Name</key>
+				<string>RunShellScriptAction</string>
+				<key>InputUUID</key>
+				<string>C2D1E3F4-5A6B-7C8D-9E0F-A1B2C3D4E5F6</string>
+				<key>Keywords</key>
+				<array>
+					<string>Shell</string>
+					<string>Script</string>
+					<string>Command</string>
+					<string>Run</string>
+					<string>Unix</string>
+				</array>
+				<key>OutputUUID</key>
+				<string>D3E2F1A0-6B5C-8D7E-0F9A-B1C2D3E4F5A6</string>
+				<key>UUID</key>
+				<string>E4F3A2B1-7C6D-9E8F-1A0B-C2D3E4F5A6B7</string>
+				<key>UnlocalizedApplications</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>arguments</key>
+				<dict>
+					<key>0</key>
+					<dict>
+						<key>default value</key>
+						<integer>0</integer>
+						<key>name</key>
+						<string>inputMethod</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>0</string>
+					</dict>
+					<key>1</key>
+					<dict>
+						<key>default value</key>
+						<false/>
+						<key>name</key>
+						<string>CheckedForUserDefaultShell</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>1</string>
+					</dict>
+					<key>2</key>
+					<dict>
+						<key>default value</key>
+						<string></string>
+						<key>name</key>
+						<string>source</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>2</string>
+					</dict>
+					<key>3</key>
+					<dict>
+						<key>default value</key>
+						<string></string>
+						<key>name</key>
+						<string>COMMAND_STRING</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>3</string>
+					</dict>
+					<key>4</key>
+					<dict>
+						<key>default value</key>
+						<string>/bin/sh</string>
+						<key>name</key>
+						<string>shell</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>4</string>
+					</dict>
+				</dict>
+				<key>isViewVisible</key>
+				<integer>1</integer>
+				<key>location</key>
+				<string>309.000000:305.000000</string>
+				<key>nibPath</key>
+				<string>/System/Library/Automator/Run Shell Script.action/Contents/Resources/Base.lproj/main.nib</string>
+			</dict>
+			<key>isViewVisible</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>connectors</key>
+	<dict/>
+	<key>workflowMetaData</key>
+	<dict>
+		<key>applicationBundleIDsByPath</key>
+		<dict/>
+		<key>applicationPaths</key>
+		<array/>
+		<key>inputTypeIdentifier</key>
+		<string>com.apple.Automator.text</string>
+		<key>outputTypeIdentifier</key>
+		<string>com.apple.Automator.nothing</string>
+		<key>presentationMode</key>
+		<integer>15</integer>
+		<key>processesInput</key>
+		<integer>0</integer>
+		<key>serviceInputTypeIdentifier</key>
+		<string>com.apple.Automator.text</string>
+		<key>serviceOutputTypeIdentifier</key>
+		<string>com.apple.Automator.nothing</string>
+		<key>serviceProcessesInput</key>
+		<integer>0</integer>
+		<key>systemImageName</key>
+		<string>NSActionTemplate</string>
+		<key>useAutomaticInputType</key>
+		<false/>
+		<key>workflowTypeIdentifier</key>
+		<string>com.apple.Automator.servicesMenu</string>
+	</dict>
+</dict>
+</plist>

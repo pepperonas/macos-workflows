@@ -22,6 +22,8 @@ A collection of useful macOS Finder Quick Actions (Automator workflows) that are
 |----------|-------------|--------------|
 | [Remove Nano Banana Watermark](workflows/remove-nano-banana-watermark/) | Removes the sparkle watermark from Nano Banana AI-generated images | Python 3, Pillow |
 | [Resize to w1024px](workflows/resize-to-w1024px/) | Resizes images to 1024px width, keeping aspect ratio. Skips smaller images | None (built-in `sips`) |
+| [WhatsApp Zeilenumbruch](workflows/whatsapp-line-wrap/) | Wraps selected text to 40-char lines for WhatsApp readability. Converts ASCII tables to card format. Result copied to clipboard | Python 3 |
+| [Vokale entfernen](workflows/remove-vowels/) | Removes all vowels (incl. German umlauts äöü) from selected text. Result copied to clipboard | None (built-in `tr`) |
 
 ## Quick Install
 
@@ -37,7 +39,8 @@ open "macos-workflows/workflows/remove-nano-banana-watermark/Remove Nano Banana 
 
 ## Usage
 
-After installing, right-click any file in Finder → **Quick Actions** → select the workflow.
+- **Image workflows:** Right-click any file in Finder → **Quick Actions** → select the workflow.
+- **Text workflows:** Select text in any app → right-click → **Services** → select the workflow. The result is copied to your clipboard.
 
 ## Contributing
 
