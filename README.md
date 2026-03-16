@@ -1,5 +1,9 @@
 # macOS Workflows
 
+<p align="center">
+  <img src="banner.png" alt="macOS Workflows" width="800">
+</p>
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![macOS](https://img.shields.io/badge/macOS-15%2B-000000?logo=apple&logoColor=white)](https://www.apple.com/macos/)
 [![Automator](https://img.shields.io/badge/Automator-Quick%20Actions-8B5CF6?logo=apple&logoColor=white)](https://support.apple.com/guide/automator/)
