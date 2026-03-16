@@ -11,7 +11,15 @@ Removes the sparkle watermark that [Nano Banana](https://nano-banana.com) places
 
 ## Requirements
 
-- Python 3 with [Pillow](https://pillow.readthedocs.io/):
+- **Python 3** — if not already installed:
+  ```bash
+  # via Homebrew (recommended)
+  brew install python
+
+  # or via Xcode Command Line Tools (includes Python 3)
+  xcode-select --install
+  ```
+- **Pillow** (image processing library):
   ```bash
   pip3 install Pillow
   ```
