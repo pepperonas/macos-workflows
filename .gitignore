@@ -1,3 +1,4 @@
 .DS_Store
 *.swp
 *~
+workflows/remove-background/remove_background
