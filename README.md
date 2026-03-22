@@ -26,6 +26,7 @@ A collection of useful macOS Finder Quick Actions (Automator workflows) and util
 | [Resize to w1024px](workflows/resize-to-w1024px/) | Resizes images to 1024px width, keeping aspect ratio. Skips smaller images | None (built-in `sips`) |
 | [WhatsApp Line Wrap](workflows/whatsapp-line-wrap/) | Wraps selected text to 40-char lines for WhatsApp readability. Converts ASCII tables to card format. Result copied to clipboard | Python 3 |
 | [Remove Vowels](workflows/remove-vowels/) | Removes all vowels (incl. German umlauts äöü) from selected text. Result copied to clipboard | None (built-in `tr`) |
+| [New Textfile](workflows/new-textfile/) | Creates a new text file in the current folder and opens it in the default editor | None |
 | [Cleanup Caches](workflows/cleanup-caches/) | Frees disk space by clearing macOS/npm/Gradle caches and flushing PM2 logs. Shows notification with results | None |
 
 ## Quick Install
