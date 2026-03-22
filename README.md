@@ -15,7 +15,7 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/pepperonas/macos-workflows)](https://github.com/pepperonas/macos-workflows/commits/main)
 [![Maintenance](https://img.shields.io/badge/Maintained-yes-green.svg)](https://github.com/pepperonas/macos-workflows)
 
-A collection of useful macOS Finder Quick Actions (Automator workflows) that are easy to install and use.
+A collection of useful macOS Finder Quick Actions (Automator workflows) and utility scripts that are easy to install and use.
 
 ## Available Workflows
 
@@ -26,6 +26,12 @@ A collection of useful macOS Finder Quick Actions (Automator workflows) that are
 | [Resize to w1024px](workflows/resize-to-w1024px/) | Resizes images to 1024px width, keeping aspect ratio. Skips smaller images | None (built-in `sips`) |
 | [WhatsApp Line Wrap](workflows/whatsapp-line-wrap/) | Wraps selected text to 40-char lines for WhatsApp readability. Converts ASCII tables to card format. Result copied to clipboard | Python 3 |
 | [Remove Vowels](workflows/remove-vowels/) | Removes all vowels (incl. German umlauts äöü) from selected text. Result copied to clipboard | None (built-in `tr`) |
+
+## Utility Scripts
+
+| Script | Description | Requirements |
+|--------|-------------|--------------|
+| [Cleanup Caches](workflows/cleanup-caches/) | Frees disk space by clearing macOS/npm/Gradle caches and flushing PM2 logs | None |
 
 ## Quick Install
 
