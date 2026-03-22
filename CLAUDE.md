@@ -24,6 +24,14 @@ Follow the existing pattern:
 4. In `.wflow` XML, `>` must be escaped as `&gt;` (e.g. `2&gt;/dev/null` for stderr redirect)
 5. Add entry to the table in root `README.md`
 
+## Installing Workflows
+
+**Important:** Do NOT manually copy `.workflow` bundles into `~/Library/Services/`. Manually copied workflows are not properly registered by macOS and will not appear in Finder Quick Actions. Always install by either:
+- Double-clicking the `.workflow` file (triggers Automator install dialog), or
+- `open "Name.workflow"` from the terminal
+
+After installation, enable under **System Settings > General > Login Items & Extensions > Finder**.
+
 ## Build
 
 Only `remove-background` requires compilation:
