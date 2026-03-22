@@ -26,7 +26,16 @@ A collection of useful macOS Finder Quick Actions (Automator workflows) and util
 | [Resize to w1024px](workflows/resize-to-w1024px/) | Resizes images to 1024px width, keeping aspect ratio. Skips smaller images | None (built-in `sips`) |
 | [WhatsApp Line Wrap](workflows/whatsapp-line-wrap/) | Wraps selected text to 40-char lines for WhatsApp readability. Converts ASCII tables to card format. Result copied to clipboard | Python 3 |
 | [Remove Vowels](workflows/remove-vowels/) | Removes all vowels (incl. German umlauts äöü) from selected text. Result copied to clipboard | None (built-in `tr`) |
+| [Strip EXIF](workflows/strip-exif/) | Removes metadata (GPS, camera info) from images for privacy | None (built-in `sips`) |
+| [Add Rounded Corners](workflows/add-rounded-corners/) | Adds rounded corners with transparency to images | Python 3, Pillow |
+| [Add Drop Shadow](workflows/add-drop-shadow/) | Adds a soft drop shadow around images | Python 3, Pillow |
+| [QR Code](workflows/qr-code/) | Generates a QR code PNG from file contents or file path | Xcode CLI Tools |
 | [New Textfile](workflows/new-textfile/) | Creates a new text file in the current folder and opens it in the default editor | None |
+| [Copy File Path](workflows/copy-file-path/) | Copies the full path of selected file(s) to the clipboard | None |
+| [Copy Folder Tree](workflows/copy-folder-tree/) | Copies the folder structure as text tree to the clipboard | None (optional: `tree`) |
+| [JSON Prettify](workflows/json-prettify/) | Formats selected JSON text with proper indentation. Result copied to clipboard | Python 3 |
+| [Convert Case](workflows/convert-case/) | Converts between camelCase, snake_case, and kebab-case. Result copied to clipboard | None |
+| [Text Statistics](workflows/text-statistics/) | Shows word, character, and line count as notification | None |
 | [Cleanup Caches](workflows/cleanup-caches/) | Frees disk space by clearing macOS/npm/Gradle caches and flushing PM2 logs. Shows notification with results | None |
 
 ## Quick Install
