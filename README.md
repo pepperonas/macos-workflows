@@ -26,6 +26,7 @@ A collection of useful macOS Finder Quick Actions (Automator workflows) and util
 | [Resize to w1024px](workflows/resize-to-w1024px/) | Resizes images to 1024px width, keeping aspect ratio. Skips smaller images | None (built-in `sips`) |
 | [WhatsApp Line Wrap](workflows/whatsapp-line-wrap/) | Wraps selected text to 40-char lines for WhatsApp readability. Converts ASCII tables to card format. Result copied to clipboard | Python 3 |
 | [Remove Vowels](workflows/remove-vowels/) | Removes all vowels (incl. German umlauts äöü) from selected text. Result copied to clipboard | None (built-in `tr`) |
+| [Copy Metadata](workflows/copy-metadata/) | Copies all file metadata (GPS, camera, dimensions, dates) to the clipboard | None (built-in `mdls`) |
 | [Strip EXIF](workflows/strip-exif/) | Removes metadata (GPS, camera info) from images for privacy | None (built-in `sips`) |
 | [Add Rounded Corners](workflows/add-rounded-corners/) | Adds rounded corners with transparency to images | Python 3, Pillow |
 | [Add Drop Shadow](workflows/add-drop-shadow/) | Adds a soft drop shadow around images | Python 3, Pillow |
