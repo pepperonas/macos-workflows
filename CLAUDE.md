@@ -30,21 +30,25 @@ Follow the existing pattern:
 - Double-clicking the `.workflow` file (triggers Automator install dialog), or
 - `open "Name.workflow"` from the terminal
 
+**Caveat:** `open "Name.workflow"` moves (not copies) the files from the source directory into `~/Library/Services/`. This means the original files in the repo disappear. Always commit before running `open` to install, or restore with `git checkout` afterwards.
+
 After installation, enable under **System Settings > General > Login Items & Extensions > Finder**.
 
 ## Build
 
-Only `remove-background` requires compilation:
+Two workflows require compilation (Swift binaries):
 
 ```bash
 cd workflows/remove-background && ./build.sh
+cd workflows/qr-code && ./build.sh
 ```
 
-This compiles `remove_background.swift` and installs the binary to `~/Library/Services/remove_background`. All other workflows have no build step.
+Each compiles a Swift source file and installs the binary to `~/Library/Services/`. All other workflows have no build step.
 
 ## Key Technical Details
 
 - All `.workflow` bundles use Automator version 2.10 (build 534), `AMDocumentVersion` 2
 - The `Info.plist` defines the service name, input types (`NSSendFileTypes` or `NSSendTypes`), and icon
 - Python-based workflows embed the full Python script inline in the `.wflow` via heredoc (`<<'PYEOF'`)
-- The compiled `remove_background` binary is git-ignored; only the `.swift` source is tracked
+- Compiled Swift binaries (`remove_background`, `qr_code`) are git-ignored; only `.swift` sources are tracked
+- For metadata reading, use `file` + `stat` + `sips -g all` instead of `mdls` — `mdls` fails on files not indexed by Spotlight
