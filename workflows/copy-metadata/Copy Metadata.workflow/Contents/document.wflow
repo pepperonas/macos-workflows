@@ -62,10 +62,24 @@
 					<string>output=""
 for f in "$@"; do
     base=$(basename "$f")
-    meta=$(mdls "$f" 2&gt;/dev/null | grep -v "^$")
+    info="$(file -b "$f" 2&gt;/dev/null)"
+    stats="$(stat -f "Size: %z bytes
+Created: %SB
+Modified: %Sm" "$f" 2&gt;/dev/null)"
     output="${output}=== ${base} ===
-${meta}
-
+${info}
+${stats}
+"
+    ext="${f##*.}"
+    ext_lower=$(echo "$ext" | tr '[:upper:]' '[:lower:]')
+    case "$ext_lower" in
+        jpg|jpeg|png|gif|bmp|tiff|tif|heic|webp|svg)
+            img_meta=$(sips -g all "$f" 2&gt;/dev/null | tail -n +2)
+            output="${output}${img_meta}
+"
+            ;;
+    esac
+    output="${output}
 "
 done
 
