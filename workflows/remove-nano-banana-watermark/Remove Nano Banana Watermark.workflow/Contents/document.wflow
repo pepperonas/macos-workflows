@@ -63,18 +63,20 @@
 PYTHON=$(command -v python3)
 for f in "$@"; do
     "$PYTHON" - "$f" &lt;&lt;'PYEOF'
-import sys, os
+import sys, os, random, math
 from PIL import Image, ImageFilter
 
 WM_RIGHT_PCT = 6.0
 WM_BOTTOM_PCT = 10.8
 WM_SIZE_PCT = 3.8
 PADDING = 1.2
-FEATHER = 0.35
+FEATHER = 0.4
 
 filepath = sys.argv[1]
 img = Image.open(filepath).copy()
 w, h = img.size
+src = img.load()
+channels = len(img.mode)
 
 wm_size = int(w * WM_SIZE_PCT / 100 * PADDING)
 wm_right = int(w * WM_RIGHT_PCT / 100)
@@ -87,55 +89,89 @@ x2, y2 = min(w, x2), min(h, y2)
 
 pw, ph = x2 - x1, y2 - y1
 feather = int(max(pw, ph) * FEATHER)
+margin = feather
 
-# Sample surrounding strips for texture
-left_strip = img.crop((max(0, x1 - feather * 2), y1, x1, y2))
-right_strip = img.crop((x2, y1, min(w, x2 + feather * 2), y2))
-above_strip = img.crop((x1, max(0, y1 - feather * 2), x2, y1))
-below_strip = img.crop((x1, y2, x2, min(h, y2 + feather * 2)))
+# Distance-weighted interpolation from all 4 borders
+# For each pixel inside the patch, sample the nearest border pixel
+# from each side and blend by inverse distance
+for py in range(y1, y2):
+    for px in range(x1, x2):
+        dl = px - x1  # distance from left edge
+        dr = x2 - 1 - px  # distance from right edge
+        dt = py - y1  # distance from top edge
+        db = y2 - 1 - py  # distance from bottom edge
 
-# Fill patch by mirroring surrounding content inward
-patch = img.crop((x1, y1, x2, y2)).copy()
+        samples = []
+        weights = []
 
-# Mirror left strip inward
-if left_strip.size[0] &gt; 0 and left_strip.size[1] &gt; 0:
-    ls = left_strip.transpose(Image.FLIP_LEFT_RIGHT)
-    ls = ls.resize((pw, ph))
-    # Mirror above strip inward
-    if above_strip.size[0] &gt; 0 and above_strip.size[1] &gt; 0:
-        ab = above_strip.transpose(Image.FLIP_TOP_BOTTOM)
-        ab = ab.resize((pw, ph))
-        # Blend horizontal and vertical mirrors
-        patch = Image.blend(ls, ab, 0.5)
-    else:
-        patch = ls
+        # Left border sample: mirror x into left margin
+        sx = max(0, x1 - 1 - dl)
+        if sx &gt;= 0:
+            samples.append(src[sx, py])
+            weights.append(1.0 / (dl + 1))
 
-# Apply strong blur to the filled patch
-blur_r = max(8, min(pw, ph) // 4)
+        # Right border sample: mirror x into right margin
+        sx = min(w - 1, x2 + dl)
+        samples.append(src[sx, py])
+        weights.append(1.0 / (dr + 1))
+
+        # Top border sample: mirror y into top margin
+        sy = max(0, y1 - 1 - dt)
+        if sy &gt;= 0:
+            samples.append(src[px, sy])
+            weights.append(1.0 / (dt + 1))
+
+        # Bottom border sample: mirror y into bottom margin
+        sy = min(h - 1, y2 + dt)
+        samples.append(src[px, sy])
+        weights.append(1.0 / (db + 1))
+
+        # Weighted average
+        total_w = sum(weights)
+        result = tuple(
+            int(sum(s[c] * wt for s, wt in zip(samples, weights)) / total_w)
+            for c in range(channels)
+        )
+        src[px, py] = result
+
+# Light blur only on the patch itself to smooth interpolation artifacts
+blur_r = max(2, min(pw, ph) // 12)
+patch = img.crop((x1, y1, x2, y2))
 patch = patch.filter(ImageFilter.GaussianBlur(radius=blur_r))
 
-# Create feathered alpha mask for smooth blending
+# Add subtle noise to match surrounding texture grain
+noise_area = img.crop((max(0, x1 - pw), y1, x1, y2))
+if noise_area.size[0] &gt; 0 and noise_area.size[1] &gt; 0:
+    na = noise_area.load()
+    nw, nh = noise_area.size
+    variance = 0.0
+    count = 0
+    for ny in range(nh):
+        for nx in range(max(0, nw - 10), nw):
+            if nx + 1 &lt; nw:
+                diff = sum((na[nx, ny][c] - na[nx+1, ny][c])**2 for c in range(channels))
+                variance += diff
+                count += 1
+    grain = int(math.sqrt(variance / max(count, 1)) * 0.4) if count else 0
+    if grain &gt; 0:
+        pp = patch.load()
+        for ny in range(ph):
+            for nx in range(pw):
+                px_val = pp[nx, ny]
+                noisy = tuple(max(0, min(255, px_val[c] + random.randint(-grain, grain))) for c in range(channels))
+                pp[nx, ny] = noisy
+
+# Feathered mask for smooth edge transition
 mask = Image.new("L", (pw, ph), 255)
-pixels = mask.load()
+mp = mask.load()
 for y in range(ph):
     for x in range(pw):
         dist = min(x, pw - 1 - x, y, ph - 1 - y)
         if dist &lt; feather:
-            pixels[x, y] = int(255 * (dist / feather) ** 0.7)
+            mp[x, y] = int(255 * (dist / feather) ** 0.6)
 
-# Paste blended patch with feathered mask
+# Paste with feathered mask
 img.paste(patch, (x1, y1), mask)
-
-# Final light blur over a wider area to smooth any remaining seams
-m = feather
-bx1, by1 = max(0, x1 - m), max(0, y1 - m)
-bx2, by2 = min(w, x2 + m), min(h, y2 + m)
-final_patch = img.crop((bx1, by1, bx2, by2))
-final_patch = final_patch.filter(ImageFilter.GaussianBlur(radius=max(3, blur_r // 3)))
-# Blend final blur softly to preserve surrounding detail
-orig_patch = img.crop((bx1, by1, bx2, by2))
-blended = Image.blend(orig_patch, final_patch, 0.4)
-img.paste(blended, (bx1, by1))
 
 base, ext = os.path.splitext(filepath)
 out = f"{base}_clean{ext}"
