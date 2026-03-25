@@ -13,7 +13,7 @@ Every workflow is an Automator service bundle containing a `document.wflow` (pli
 - **File workflows** — Accept `com.apple.Automator.fileSystemObject` / `public.item`. Process images and save new files with a suffix (e.g. `-w1024`, `-free`, `_clean`) next to the original. Never modify the original.
 - **Text workflows** — Accept `public.utf8-plain-text` via stdin (`inputMethod: 0`). Pipe result to `pbcopy` (clipboard).
 
-Scripts are either embedded directly in the `.wflow` XML or call an external compiled binary (remove-background).
+Scripts are either embedded directly in the `.wflow` XML or call an external compiled binary (remove-background, qr-code).
 
 ## Adding a New Workflow
 
@@ -23,7 +23,7 @@ Follow the existing pattern:
 3. Shell is `/bin/zsh`, input passed as arguments (`inputMethod: 1`) for file workflows or stdin (`inputMethod: 0`) for text workflows
 4. In `.wflow` XML, `>` must be escaped as `&gt;` (e.g. `2&gt;/dev/null` for stderr redirect)
 5. Scripts using `python3` must set `export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"` at the top — Automator uses a stripped PATH that only finds `/usr/bin/python3` (system Python without pip packages)
-5. Add entry to the table in root `README.md`
+6. Add entry to the appropriate table (Image / Text / File & Utility) in root `README.md`
 
 ## Installing Workflows
 
@@ -53,3 +53,5 @@ Each compiles a Swift source file and installs the binary to `~/Library/Services
 - Python-based workflows embed the full Python script inline in the `.wflow` via heredoc (`<<'PYEOF'`)
 - Compiled Swift binaries (`remove_background`, `qr_code`) are git-ignored; only `.swift` sources are tracked
 - For metadata reading, use `file` + `stat` + `sips -g all` instead of `mdls` — `mdls` fails on files not indexed by Spotlight
+- `open "Name.workflow"` for installation moves files out of the repo — always commit first or restore with `git checkout` after
+- File workflows that don't process specific file types (e.g. Cleanup Caches) must still accept `fileSystemObject` input to appear in Finder Quick Actions — `com.apple.Automator.nothing` input types won't show up in the context menu
