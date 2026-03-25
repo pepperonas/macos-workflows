@@ -69,6 +69,7 @@ WM_RIGHT_PCT = 6.0
 WM_BOTTOM_PCT = 10.8
 WM_SIZE_PCT = 3.8
 PADDING = 1.2
+FEATHER = 0.35
 
 filepath = sys.argv[1]
 img = Image.open(filepath).copy()
@@ -83,24 +84,57 @@ x2, y2 = x1 + wm_size, y1 + wm_size
 x1, y1 = max(0, x1 - wm_size // 4), max(0, y1 - wm_size // 4)
 x2, y2 = min(w, x2), min(h, y2)
 
-sample_x = max(0, x1 - wm_size)
-bg_raw = img.crop((sample_x, y1, x1, y2)).tobytes()
-above_raw = img.crop((x1, max(0, y1 - wm_size), x2, y1)).tobytes()
+pw, ph = x2 - x1, y2 - y1
+feather = int(max(pw, ph) * FEATHER)
 
-channels = len(img.mode)
-all_raw = bg_raw + above_raw
-n = len(all_raw) // channels
-avg = tuple(sum(all_raw[c::channels]) // n for c in range(channels)) if n else ((0,)*channels)
+# Sample surrounding strips for texture
+left_strip = img.crop((max(0, x1 - feather * 2), y1, x1, y2))
+right_strip = img.crop((x2, y1, min(w, x2 + feather * 2), y2))
+above_strip = img.crop((x1, max(0, y1 - feather * 2), x2, y1))
+below_strip = img.crop((x1, y2, x2, min(h, y2 + feather * 2)))
 
-for y in range(y1, y2):
-    for x in range(x1, x2):
-        img.putpixel((x, y), avg)
+# Fill patch by mirroring surrounding content inward
+patch = img.crop((x1, y1, x2, y2)).copy()
 
-m = 3
-bx1, by1 = max(0, x1-m), max(0, y1-m)
-bx2, by2 = min(w, x2+m), min(h, y2+m)
-patch = img.crop((bx1,by1,bx2,by2)).filter(ImageFilter.GaussianBlur(radius=2))
-img.paste(patch, (bx1,by1))
+# Mirror left strip inward
+if left_strip.size[0] &gt; 0 and left_strip.size[1] &gt; 0:
+    ls = left_strip.transpose(Image.FLIP_LEFT_RIGHT)
+    ls = ls.resize((pw, ph))
+    # Mirror above strip inward
+    if above_strip.size[0] &gt; 0 and above_strip.size[1] &gt; 0:
+        ab = above_strip.transpose(Image.FLIP_TOP_BOTTOM)
+        ab = ab.resize((pw, ph))
+        # Blend horizontal and vertical mirrors
+        patch = Image.blend(ls, ab, 0.5)
+    else:
+        patch = ls
+
+# Apply strong blur to the filled patch
+blur_r = max(8, min(pw, ph) // 4)
+patch = patch.filter(ImageFilter.GaussianBlur(radius=blur_r))
+
+# Create feathered alpha mask for smooth blending
+mask = Image.new("L", (pw, ph), 255)
+pixels = mask.load()
+for y in range(ph):
+    for x in range(pw):
+        dist = min(x, pw - 1 - x, y, ph - 1 - y)
+        if dist &lt; feather:
+            pixels[x, y] = int(255 * (dist / feather) ** 0.7)
+
+# Paste blended patch with feathered mask
+img.paste(patch, (x1, y1), mask)
+
+# Final light blur over a wider area to smooth any remaining seams
+m = feather
+bx1, by1 = max(0, x1 - m), max(0, y1 - m)
+bx2, by2 = min(w, x2 + m), min(h, y2 + m)
+final_patch = img.crop((bx1, by1, bx2, by2))
+final_patch = final_patch.filter(ImageFilter.GaussianBlur(radius=max(3, blur_r // 3)))
+# Blend final blur softly to preserve surrounding detail
+orig_patch = img.crop((bx1, by1, bx2, by2))
+blended = Image.blend(orig_patch, final_patch, 0.4)
+img.paste(blended, (bx1, by1))
 
 base, ext = os.path.splitext(filepath)
 out = f"{base}_clean{ext}"
