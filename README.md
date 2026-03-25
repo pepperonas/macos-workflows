@@ -23,6 +23,7 @@ A collection of useful macOS Finder Quick Actions (Automator workflows) and util
 |----------|-------------|--------------|
 | [Remove Nano Banana Watermark](workflows/remove-nano-banana-watermark/) | Removes the sparkle watermark from Nano Banana AI-generated images | Python 3, Pillow |
 | [Remove Background](workflows/remove-background/) | Removes the background from images, keeping only the main subject with transparency | macOS 14+, Xcode CLI Tools |
+| [Optimize Image](workflows/optimize-image/) | Reduces file size by re-encoding (JPG quality 82, PNG via pngquant). Shows before/after in notification | None (optional: `pngquant`) |
 | [Resize to w1024px](workflows/resize-to-w1024px/) | Resizes images to 1024px width, keeping aspect ratio. Skips smaller images | None (built-in `sips`) |
 | [WhatsApp Line Wrap](workflows/whatsapp-line-wrap/) | Wraps selected text to 40-char lines for WhatsApp readability. Converts ASCII tables to card format. Result copied to clipboard | Python 3 |
 | [Remove Vowels](workflows/remove-vowels/) | Removes all vowels (incl. German umlauts äöü) from selected text. Result copied to clipboard | None (built-in `tr`) |
