@@ -59,7 +59,7 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin"
+					<string>export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 python3 -c '
 import sys, textwrap, subprocess, re
 

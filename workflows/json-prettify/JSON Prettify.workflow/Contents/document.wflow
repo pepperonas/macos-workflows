@@ -59,7 +59,8 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>python3 -m json.tool 2&gt;/dev/null | perl -pe 'chomp if eof' | pbcopy</string>
+					<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+python3 -m json.tool 2&gt;/dev/null | perl -pe 'chomp if eof' | pbcopy</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>

@@ -75,7 +75,8 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>for f in "$@"; do
+					<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+for f in "$@"; do
     ext="${f##*.}"
     ext_lower=$(echo "$ext" | tr '[:upper:]' '[:lower:]')
     case "$ext_lower" in

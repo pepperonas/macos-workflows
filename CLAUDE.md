@@ -22,6 +22,7 @@ Follow the existing pattern:
 2. Use an existing workflow as template — copy the plist XML structure, change UUIDs, script content, and service name
 3. Shell is `/bin/zsh`, input passed as arguments (`inputMethod: 1`) for file workflows or stdin (`inputMethod: 0`) for text workflows
 4. In `.wflow` XML, `>` must be escaped as `&gt;` (e.g. `2&gt;/dev/null` for stderr redirect)
+5. Scripts using `python3` must set `export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"` at the top — Automator uses a stripped PATH that only finds `/usr/bin/python3` (system Python without pip packages)
 5. Add entry to the table in root `README.md`
 
 ## Installing Workflows

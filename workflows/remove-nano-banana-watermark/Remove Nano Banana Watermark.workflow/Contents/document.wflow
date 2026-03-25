@@ -59,7 +59,8 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>PYTHON=$(command -v python3)
+					<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+PYTHON=$(command -v python3)
 for f in "$@"; do
     "$PYTHON" - "$f" &lt;&lt;'PYEOF'
 import sys, os
