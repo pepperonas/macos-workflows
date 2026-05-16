@@ -59,14 +59,19 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>bytes_to_human() {
+					<string>export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+export LC_NUMERIC=C
+
+bytes_to_human() {
     local bytes=$1
     if (( bytes &gt;= 1073741824 )); then
         printf "%.1f GB" "$(echo "scale=1; $bytes / 1073741824" | bc)"
     elif (( bytes &gt;= 1048576 )); then
         printf "%.0f MB" "$(echo "scale=0; $bytes / 1048576" | bc)"
-    else
+    elif (( bytes &gt;= 1024 )); then
         printf "%.0f KB" "$(echo "scale=0; $bytes / 1024" | bc)"
+    else
+        printf "%d B" "$bytes"
     fi
 }
 
@@ -78,36 +83,59 @@ dir_size_bytes() {
     fi
 }
 
-total_freed=0
-
-clean_dir() {
-    local path="$1"
-    if [ -d "$path" ]; then
-        local before
-        before=$(dir_size_bytes "$path")
-        rm -rf "${path:?}"/* 2&gt;/dev/null
-        local after
-        after=$(dir_size_bytes "$path")
-        local freed=$((before - after))
-        total_freed=$((total_freed + freed))
-    fi
+free_disk_bytes() {
+    df -k /System/Volumes/Data | awk 'NR==2{print $4 * 1024}'
 }
 
-clean_dir "$HOME/Library/Caches"
-clean_dir "$HOME/.npm/_cacache"
-clean_dir "$HOME/.gradle/caches"
+T1=$(dir_size_bytes "$HOME/Library/Caches")
+T2=$(dir_size_bytes "$HOME/.npm/_cacache")
+T3=$(dir_size_bytes "$HOME/.gradle/caches")
+T4=$(dir_size_bytes "$HOME/Library/Logs")
+T5=$(dir_size_bytes "$HOME/.pm2/logs")
+TOTAL=$((T1 + T2 + T3 + T4 + T5))
 
-if command -v pm2 &amp;&gt;/dev/null; then
-    pm2 flush &gt;/dev/null 2&gt;&amp;1
-fi
+preview="~/Library/Caches: $(bytes_to_human $T1)
+~/.npm/_cacache: $(bytes_to_human $T2)
+~/.gradle/caches: $(bytes_to_human $T3)
+~/Library/Logs: $(bytes_to_human $T4)
+~/.pm2/logs: $(bytes_to_human $T5)
+
+Gesamt: $(bytes_to_human $TOTAL)
++ pm2 flush, npm cache clean, brew cleanup, raspi3/raspi2 PM2 flush"
+
+choice=$(osascript &lt;&lt;APPLESCRIPT 2&gt;/dev/null
+try
+    set d to display dialog "Cleanup Caches wird folgende Caches &amp; Logs leeren:
+
+${preview}" with title "Cleanup Caches" buttons {"Abbrechen", "Löschen"} default button "Löschen" cancel button "Abbrechen" with icon caution
+    return button returned of d
+on error
+    return "cancel"
+end try
+APPLESCRIPT
+)
+
+[ "$choice" != "Löschen" ] &amp;&amp; exit 0
+
+before=$(free_disk_bytes)
+
+for p in "$HOME/Library/Caches" "$HOME/.npm/_cacache" "$HOME/.gradle/caches" "$HOME/Library/Logs" "$HOME/.pm2/logs"; do
+    [ -d "$p" ] &amp;&amp; rm -rf "${p:?}"/* 2&gt;/dev/null || true
+done
+
+command -v pm2 &gt;/dev/null 2&gt;&amp;1 &amp;&amp; pm2 flush &gt;/dev/null 2&gt;&amp;1 || true
+command -v npm &gt;/dev/null 2&gt;&amp;1 &amp;&amp; npm cache clean --force &gt;/dev/null 2&gt;&amp;1 || true
+command -v brew &gt;/dev/null 2&gt;&amp;1 &amp;&amp; brew cleanup -s &gt;/dev/null 2&gt;&amp;1 || true
 
 ssh -o ConnectTimeout=3 raspi3 'pm2 flush' &gt;/dev/null 2&gt;&amp;1 || true
 ssh -o ConnectTimeout=3 raspi2 'sudo pm2 flush' &gt;/dev/null 2&gt;&amp;1 || true
 
-summary="$(bytes_to_human $total_freed) freed"
-disk="$(df -h /System/Volumes/Data | awk 'NR==2{print $4 " available"}')"
+after=$(free_disk_bytes)
+freed=$((after - before))
+[ "$freed" -lt 0 ] &amp;&amp; freed=0
 
-osascript -e "display notification \"$summary — $disk\" with title \"Cleanup Caches\""</string>
+disk="$(df -h /System/Volumes/Data | awk 'NR==2{print $4 " available"}')"
+osascript -e "display notification \"$(bytes_to_human $freed) freed — $disk\" with title \"Cleanup Caches\" sound name \"Glass\""</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>

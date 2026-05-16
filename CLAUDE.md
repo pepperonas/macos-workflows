@@ -46,6 +46,25 @@ cd workflows/qr-code && ./build.sh
 
 Each compiles a Swift source file and installs the binary to `~/Library/Services/`. All other workflows have no build step.
 
+## Testing
+
+Plain-bash test suite under `tests/`. No external deps. Run with `./tests/run.sh`.
+
+- Tests source the script under test (`source "$REPO_ROOT/workflows/<name>/<name>.sh"`)
+- For scripts that need to be source-safe, guard `main()` with
+  `if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then main "$@"; fi`
+- Test files: `tests/test-<workflow>.sh` — each `test_*` function is auto-discovered
+- Helpers exported from `tests/run.sh`: `assert_equal`, `assert_contains`, `assert_success`
+- Always include `plutil -lint` checks for `Info.plist` and `document.wflow`
+- See `tests/README.md` for the test authoring guide
+
+## Versioning
+
+- Repo version in `VERSION` (Semantic Versioning)
+- Release notes in `CHANGELOG.md` (Keep a Changelog format)
+- Tag releases as `vMAJOR.MINOR.PATCH`
+- When changing a workflow, bump `VERSION` and add a `CHANGELOG.md` entry
+
 ## Key Technical Details
 
 - All `.workflow` bundles use Automator version 2.10 (build 534), `AMDocumentVersion` 2
@@ -55,3 +74,5 @@ Each compiles a Swift source file and installs the binary to `~/Library/Services
 - For metadata reading, use `file` + `stat` + `sips -g all` instead of `mdls` — `mdls` fails on files not indexed by Spotlight
 - `open "Name.workflow"` for installation moves files out of the repo — always commit first or restore with `git checkout` after
 - File workflows that don't process specific file types (e.g. Cleanup Caches) must still accept `fileSystemObject` input to appear in Finder Quick Actions — `com.apple.Automator.nothing` input types won't show up in the context menu
+- Shell scripts that format numbers (`printf %.1f`, `bc`) MUST `export LC_NUMERIC=C` to avoid German locale comma decimal separators breaking `printf`
+- Avoid `set -o pipefail` in scripts that pipe `du`/other potentially-partial commands — use `var=$(cmd) || true` plus `awk 'END{...}'` for robustness instead
