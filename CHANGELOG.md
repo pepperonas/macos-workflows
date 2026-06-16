@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] — 2026-06-16
+
+### Fixed
+- **Resize to w1024px**: no longer fails with `Error 13: Cannot rename
+  temporary file` when an output file already exists. The Automator sandbox
+  only grants write access to selected and newly-created files, so `sips`
+  could not overwrite a pre-existing `-w1024` file. The action now picks a
+  free output name (`-w1024-1`, `-w1024-2`, …) instead of overwriting.
+
 ## [1.1.0] — 2026-05-16
 
 ### Added

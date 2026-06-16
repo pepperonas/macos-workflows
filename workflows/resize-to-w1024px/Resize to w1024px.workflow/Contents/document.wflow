@@ -74,6 +74,11 @@
     base=$(basename "$f")
     name="${base%.*}"
     output="${dir}/${name}-w1024.${ext}"
+    n=1
+    while [ -e "$output" ]; do
+        output="${dir}/${name}-w1024-${n}.${ext}"
+        n=$((n+1))
+    done
     sips --resampleWidth 1024 "$f" --out "$output"
 done</string>
 					<key>CheckedForUserDefaultShell</key>
