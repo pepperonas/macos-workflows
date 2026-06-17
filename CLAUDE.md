@@ -73,6 +73,6 @@ Plain-bash test suite under `tests/`. No external deps. Run with `./tests/run.sh
 - Compiled Swift binaries (`remove_background`, `qr_code`) are git-ignored; only `.swift` sources are tracked
 - For metadata reading, use `file` + `stat` + `sips -g all` instead of `mdls` — `mdls` fails on files not indexed by Spotlight
 - `open "Name.workflow"` for installation moves files out of the repo — always commit first or restore with `git checkout` after
-- File workflows that don't process specific file types (e.g. Cleanup Caches) must still accept `fileSystemObject` input to appear in Finder Quick Actions — `com.apple.Automator.nothing` input types won't show up in the context menu
+- File workflows that don't process specific file types (e.g. Cleanup Caches, Sleep Check) must still accept `fileSystemObject` input to appear in Finder Quick Actions — `com.apple.Automator.nothing` input types won't show up in the context menu
 - Shell scripts that format numbers (`printf %.1f`, `bc`) MUST `export LC_NUMERIC=C` to avoid German locale comma decimal separators breaking `printf`
 - Avoid `set -o pipefail` in scripts that pipe `du`/other potentially-partial commands — use `var=$(cmd) || true` plus `awk 'END{...}'` for robustness instead

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-06-17
+
+### Added
+- **Sleep Check** — new File & Utility Quick Action that diagnoses why the Mac
+  won't sleep. Lists active power assertions with a human cause tag and finds
+  orphaned Playwright/MCP automation browsers (`mcp-chrome`,
+  `--remote-debugging-pipe`) that hold a `"Capturing"` display-sleep assertion
+  for hours, offering to terminate them via a confirmation dialog. `caffeinate`
+  and system daemons are reported but never killed.
+- **Sleep Check**: standalone `sleepcheck.sh` CLI with `check` (default, read-only),
+  `kill`, `version`, and `help` subcommands.
+- 16 unit tests for Sleep Check (browser-match pattern, `parse_blockers` stdin
+  filter against a `pmset` fixture, `classify_blocker` mapping, subcommands,
+  plist validity) — suite now 38 tests.
+
 ## [1.1.1] — 2026-06-16
 
 ### Fixed
@@ -54,6 +69,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **File & Utility**: Copy File Path, Copy Metadata, Copy Folder Tree,
     New Textfile, Cleanup Caches
 
-[Unreleased]: https://github.com/pepperonas/macos-workflows/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/pepperonas/macos-workflows/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/pepperonas/macos-workflows/compare/v1.1.1...v1.2.0
+[1.1.1]: https://github.com/pepperonas/macos-workflows/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/pepperonas/macos-workflows/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/pepperonas/macos-workflows/releases/tag/v1.0.0
