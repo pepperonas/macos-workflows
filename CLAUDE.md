@@ -24,7 +24,8 @@ Follow the existing pattern:
 4. In `.wflow` XML, `>` must be escaped as `&gt;` (e.g. `2&gt;/dev/null` for stderr redirect)
 5. Scripts using `python3` must set `export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"` at the top — Automator uses a stripped PATH that only finds `/usr/bin/python3` (system Python without pip packages)
 6. Add entry to the appropriate table (Image / Text / File & Utility) in root `README.md`, and give the workflow its own `README.md` — `tests/test-repo.sh` fails on undocumented or unlinked workflows
-7. For workflows with a standalone CLI script, follow the LoC pattern: keep the shared logic in a marked `QUICK ACTION CORE` block in the `.sh`, generate the `.wflow`'s `COMMAND_STRING` from it (XML-escape `&`, `<`, `>`, append the entry-point call), and pin both sides with a byte-for-byte drift-guard test. Write the core bash-3.2 AND zsh compatible (Automator runs `/bin/zsh`): no `${var,,}`, no array index arithmetic, quote everything.
+7. For workflows with a standalone CLI script, follow the LoC pattern: keep the shared logic in a marked `QUICK ACTION CORE` block in the `.sh`, generate the `.wflow`'s `COMMAND_STRING` from it (XML-escape `&`, `<`, `>`, append the entry-point call), and pin both sides with a byte-for-byte drift-guard test. Write the core bash-3.2 AND zsh compatible (Automator runs `/bin/zsh`): no `${var,,}`, no array index arithmetic, quote everything. Multiple Quick Actions can share one core with different entry-point calls (LoC = `cmd_count notify`, LoC Chart = `cmd_count chart`), each with its own drift-guard test.
+8. A GUI process spawned from a Quick Action dies with the Automator run unless detached — zsh HUPs background jobs on exit, so use `nohup <tool> ... >/dev/null 2>&1 &` (see LoC Chart's `show_result`).
 
 ## Installing Workflows
 
@@ -40,14 +41,15 @@ After installation, enable under **System Settings > General > Login Items & Ext
 
 ## Build
 
-Two workflows require compilation (Swift binaries):
+Three workflows involve compilation (Swift binaries):
 
 ```bash
 cd workflows/remove-background && ./build.sh
 cd workflows/qr-code && ./build.sh
+cd workflows/loc-chart && ./build.sh   # optional — falls back to a dialog without it
 ```
 
-Each compiles a Swift source file and installs the binary to `~/Library/Services/`. All other workflows have no build step.
+Each compiles a Swift source file and installs the binary to `~/Library/Services/`. LoC Chart's build is optional (the Quick Action degrades to a Unicode-bar dialog). All other workflows have no build step.
 
 ## Testing
 

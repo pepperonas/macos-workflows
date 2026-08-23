@@ -1,27 +1,65 @@
-#!/bin/bash
-# loc.sh — Count source-code lines in folders (Finder Quick Action "LoC").
-#
-# Usage:
-#   loc.sh <folder-or-file> [...]   Print a report to stdout
-#   loc.sh notify <folder> [...]    Count + show the result window ("LoC")
-#   loc.sh chart <folder> [...]     Count + show the chart panel ("LoC Chart")
-#   loc.sh version | help
-#
-# What counts:
-#   - Only files with a source-code extension (py, js, ts, swift, go, rs, ...)
-#   - A "line" is a non-empty line (at least one non-whitespace character);
-#     comments count, blank lines do not.
-#   - Dependency/build/VCS dirs (.git, node_modules, venv, dist, build, ...)
-#     and minified/bundled files (*.min.js, *.bundle.js, ...) are skipped.
-#
-# The block between the CORE markers below is embedded verbatim (XML-escaped)
-# in LoC.workflow/Contents/document.wflow. A unit test derives the embedded
-# script from this file and fails on any drift — edit here, then regenerate.
-# The core is written to run under bash 3.2 AND zsh (Automator uses /bin/zsh):
-# no ${var,,}, no array index arithmetic, everything quoted.
-
-# --- BEGIN QUICK ACTION CORE ---
-set -u
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AMApplicationBuild</key>
+	<string>534</string>
+	<key>AMApplicationVersion</key>
+	<string>2.10</string>
+	<key>AMDocumentVersion</key>
+	<string>2</string>
+	<key>actions</key>
+	<array>
+		<dict>
+			<key>action</key>
+			<dict>
+				<key>AMAccepts</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Optional</key>
+					<true/>
+					<key>Types</key>
+					<array>
+						<string>com.apple.cocoa.string</string>
+					</array>
+				</dict>
+				<key>AMActionVersion</key>
+				<string>2.0.3</string>
+				<key>AMApplication</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>AMParameterProperties</key>
+				<dict>
+					<key>COMMAND_STRING</key>
+					<dict/>
+					<key>CheckedForUserDefaultShell</key>
+					<dict/>
+					<key>inputMethod</key>
+					<dict/>
+					<key>shell</key>
+					<dict/>
+					<key>source</key>
+					<dict/>
+				</dict>
+				<key>AMProvides</key>
+				<dict>
+					<key>Container</key>
+					<string>List</string>
+					<key>Types</key>
+					<array>
+						<string>com.apple.cocoa.string</string>
+					</array>
+				</dict>
+				<key>ActionBundlePath</key>
+				<string>/System/Library/Automator/Run Shell Script.action</string>
+				<key>ActionName</key>
+				<string>Run Shell Script</string>
+				<key>ActionParameters</key>
+				<dict>
+					<key>COMMAND_STRING</key>
+					<string>set -u
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 export LC_NUMERIC=C
@@ -93,7 +131,7 @@ lang_for_ext() {
     esac
 }
 
-# stdin: file paths (one per line) -> stdout: only source-code paths.
+# stdin: file paths (one per line) -&gt; stdout: only source-code paths.
 # Pure filter, unit-testable.
 filter_source_paths() {
     local f
@@ -120,17 +158,17 @@ list_source_files() {
         else
             expr+=(-o -name "$name")
         fi
-    done < <(prune_dir_names)
+    done &lt; &lt;(prune_dir_names)
     for t in "$@"; do
         if [ -d "$t" ]; then
-            find "$t" -mindepth 1 \( -type d \( "${expr[@]}" \) -prune \) -o -type f -print 2>/dev/null
+            find "$t" -mindepth 1 \( -type d \( "${expr[@]}" \) -prune \) -o -type f -print 2&gt;/dev/null
         elif [ -f "$t" ]; then
             printf '%s\n' "$t"
         fi
     done | filter_source_paths
 }
 
-# stdin: source file paths -> stdout: "<nonempty-lines>\t<path>" per file.
+# stdin: source file paths -&gt; stdout: "&lt;nonempty-lines&gt;\t&lt;path&gt;" per file.
 # One awk per xargs batch instead of one grep per file (fast on big trees).
 # Files with zero non-empty lines produce no row — the file COUNT therefore
 # comes from the input list, never from this output.
@@ -139,35 +177,35 @@ count_nonempty_batch() {
         FNR == 1       { if (f != "") print c "\t" f; f = FILENAME; c = 0 }
         /[^[:space:]]/ { c++ }
         END            { if (f != "") print c "\t" f }
-    ' 2>/dev/null
+    ' 2&gt;/dev/null
 }
 
-# stdin: "<lines>\t<path>" -> stdout: "<lines>\t<language>" summed, sorted
+# stdin: "&lt;lines&gt;\t&lt;path&gt;" -&gt; stdout: "&lt;lines&gt;\t&lt;language&gt;" summed, sorted
 # descending. Groups by extension first (cheap), maps to language names via
 # lang_for_ext only once per unique extension.
 aggregate_by_lang() {
     awk -F'\t' '{
         p = $2
         n = split(p, seg, "/"); base = seg[n]
-        k = split(base, dot, "."); ext = (k > 1) ? dot[k] : ""
+        k = split(base, dot, "."); ext = (k &gt; 1) ? dot[k] : ""
         if (ext != "") sum[ext] += $1
     } END { for (e in sum) print sum[e] "\t" e }' \
     | while IFS=$'\t' read -r n name; do
         lang_for_ext "$name"
-        [ -n "$REPLY_LANG" ] && printf '%s\t%s\n' "$n" "$REPLY_LANG"
+        [ -n "$REPLY_LANG" ] &amp;&amp; printf '%s\t%s\n' "$n" "$REPLY_LANG"
     done \
     | awk -F'\t' '{ s[$2] += $1 } END { for (l in s) print s[l] "\t" l }' \
     | sort -rn
 }
 
-# Thousands separator with dots (German style): 1234567 -> 1.234.567.
+# Thousands separator with dots (German style): 1234567 -&gt; 1.234.567.
 # Manual grouping — printf "%'"'"'d" would need a locale, and LC_NUMERIC=C
 # is mandatory here (see repo CLAUDE.md).
 format_number() {
     awk -v n="${1:-0}" 'BEGIN {
         s = sprintf("%d", n)
         out = ""
-        while (length(s) > 3) {
+        while (length(s) &gt; 3) {
             out = "." substr(s, length(s) - 2) out
             s = substr(s, 1, length(s) - 3)
         }
@@ -175,12 +213,12 @@ format_number() {
     }'
 }
 
-# stdin: "<lines>\t<language>" sorted desc; $1 = max entries.
+# stdin: "&lt;lines&gt;\t&lt;language&gt;" sorted desc; $1 = max entries.
 # stdout: "Lang1 1.234 · Lang2 567 · ..."
 top_langs_line() {
     local max="${1:-3}" out="" n name i=0
     while IFS=$'\t' read -r n name; do
-        [ "$i" -ge "$max" ] && break
+        [ "$i" -ge "$max" ] &amp;&amp; break
         [ -n "$name" ] || continue
         if [ -n "$out" ]; then
             out="${out} · ${name} $(format_number "$n")"
@@ -192,7 +230,7 @@ top_langs_line() {
     printf '%s' "$out"
 }
 
-# notify <title> <subtitle> <message> — result window. Deliberately a
+# notify &lt;title&gt; &lt;subtitle&gt; &lt;message&gt; — result window. Deliberately a
 # "display dialog ... giving up after" instead of "display notification":
 # macOS gives scripts NO control over a banner's duration, its hover
 # "Einblenden" button, or what a click opens (Script Editor). The dialog
@@ -203,19 +241,19 @@ notify() {
     osascript \
         -e 'on run argv' \
         -e 'set body to item 2 of argv' \
-        -e 'if item 3 of argv is not "" then set body to body & return & return & item 3 of argv' \
+        -e 'if item 3 of argv is not "" then set body to body &amp; return &amp; return &amp; item 3 of argv' \
         -e 'display dialog body with title (item 1 of argv) buttons {"OK"} default button "OK" with icon note giving up after 30' \
         -e 'end run' \
-        "$1" "$2" "$3" >/dev/null 2>&1 || true
+        "$1" "$2" "$3" &gt;/dev/null 2&gt;&amp;1 || true
 }
 
-# bar_of <count> <max> — 10-char Unicode block bar for the dialog fallback.
+# bar_of &lt;count&gt; &lt;max&gt; — 10-char Unicode block bar for the dialog fallback.
 bar_of() {
     local count="$1" max="$2" width=10 filled bar i
-    [ "$max" -gt 0 ] 2>/dev/null || max=1
+    [ "$max" -gt 0 ] 2&gt;/dev/null || max=1
     filled=$(( (count * width + max - 1) / max ))
-    [ "$filled" -lt 1 ] && filled=1
-    [ "$filled" -gt "$width" ] && filled="$width"
+    [ "$filled" -lt 1 ] &amp;&amp; filled=1
+    [ "$filled" -gt "$width" ] &amp;&amp; filled="$width"
     bar=""
     i=0
     while [ "$i" -lt "$filled" ]; do bar="${bar}█"; i=$((i + 1)); done
@@ -223,7 +261,7 @@ bar_of() {
     printf '%s' "$bar"
 }
 
-# show_result <name> <total> <files> <langs-tsv> <subtitle> — chart mode.
+# show_result &lt;name&gt; &lt;total&gt; &lt;files&gt; &lt;langs-tsv&gt; &lt;subtitle&gt; — chart mode.
 # Prefers the native loc_display panel (animated per-language bar chart,
 # built via workflows/loc-chart/build.sh); without the binary it falls
 # back to the plain dialog with Unicode block bars.
@@ -242,11 +280,11 @@ show_result() {
             else
                 rest=$((rest + n))
             fi
-        done <<< "$langs"
-        [ "$rest" -gt 0 ] && args+=(--rest "$rest")
-        # nohup + & so the panel outlives the Automator run — zsh HUPs
+        done &lt;&lt;&lt; "$langs"
+        [ "$rest" -gt 0 ] &amp;&amp; args+=(--rest "$rest")
+        # nohup + &amp; so the panel outlives the Automator run — zsh HUPs
         # background jobs on shell exit by default.
-        nohup "$tool" "${args[@]}" >/dev/null 2>&1 &
+        nohup "$tool" "${args[@]}" &gt;/dev/null 2&gt;&amp;1 &amp;
         return 0
     fi
     local max body n l
@@ -257,16 +295,16 @@ show_result() {
         [ -n "$l" ] || continue
         body="${body}
 $(bar_of "$n" "$max")  ${l}  $(format_number "$n")"
-    done <<< "$langs"
+    done &lt;&lt;&lt; "$langs"
     notify "LoC — ${name}" "${subtitle}${body}" ""
 }
 
-# cmd_count <report|notify|chart> <targets...>
+# cmd_count &lt;report|notify|chart&gt; &lt;targets...&gt;
 cmd_count() {
     local mode="$1"
     shift
     if [ "$#" -lt 1 ]; then
-        echo "loc: kein Ordner angegeben (siehe: loc.sh help)" >&2
+        echo "loc: kein Ordner angegeben (siehe: loc.sh help)" &gt;&amp;2
         return 1
     fi
 
@@ -280,10 +318,10 @@ cmd_count() {
 
     local tmp
     tmp=$(mktemp)
-    list_source_files "$@" > "$tmp"
+    list_source_files "$@" &gt; "$tmp"
 
     local files
-    files=$(wc -l < "$tmp" | tr -d '[:space:]')
+    files=$(wc -l &lt; "$tmp" | tr -d '[:space:]')
 
     if [ "$files" = "0" ]; then
         rm -f "$tmp"
@@ -296,7 +334,7 @@ cmd_count() {
     fi
 
     local counts total langs top subtitle
-    counts=$(count_nonempty_batch < "$tmp")
+    counts=$(count_nonempty_batch &lt; "$tmp")
     rm -f "$tmp"
     total=$(printf '%s\n' "$counts" | awk -F'\t' '{ s += $1 } END { printf "%d", s }')
     langs=$(printf '%s\n' "$counts" | aggregate_by_lang)
@@ -316,39 +354,156 @@ cmd_count() {
         done
     fi
 }
-# --- END QUICK ACTION CORE ---
 
-cmd_help() {
-    cat <<EOF
-loc v${LOC_VERSION} — zählt Quellcode-Zeilen (nicht-leere Zeilen)
-
-USAGE
-  loc.sh <ordner-oder-datei> [...]   Report auf stdout
-  loc.sh notify <ordner> [...]       Ergebnisfenster (Quick Action "LoC")
-  loc.sh chart <ordner> [...]        Chart-Panel (Quick Action "LoC Chart";
-                                     Fallback: Dialog mit Unicode-Balken)
-  loc.sh version | help
-
-WAS GEZÄHLT WIRD
-  - Nur Dateien mit Quellcode-Endung (py, js, ts, swift, go, rs, sh, ...)
-  - Nur nicht-leere Zeilen (mind. ein Nicht-Whitespace-Zeichen);
-    Kommentare zählen mit, Leerzeilen nicht
-  - Ausgeschlossen: .git, node_modules, venv, build, dist, vendor, ...
-    sowie Minified-/Bundle-Dateien (*.min.js, *.min.css, *.bundle.js)
-EOF
-}
-
-main() {
-    case "${1:-help}" in
-        version|--version|-v) echo "loc v${LOC_VERSION}" ;;
-        help|--help|-h)       cmd_help ;;
-        notify)               shift; cmd_count notify "$@" ;;
-        chart)                shift; cmd_count chart "$@" ;;
-        *)                    cmd_count report "$@" ;;
-    esac
-}
-
-# Only run main() when executed directly, not when sourced (for tests).
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main "$@"
-fi
+cmd_count chart "$@"</string>
+					<key>CheckedForUserDefaultShell</key>
+					<true/>
+					<key>inputMethod</key>
+					<integer>1</integer>
+					<key>shell</key>
+					<string>/bin/zsh</string>
+					<key>source</key>
+					<string></string>
+				</dict>
+				<key>BundleIdentifier</key>
+				<string>com.apple.RunShellScript</string>
+				<key>CFBundleVersion</key>
+				<string>2.0.3</string>
+				<key>CanShowSelectedItemsWhenRun</key>
+				<false/>
+				<key>CanShowWhenRun</key>
+				<true/>
+				<key>Category</key>
+				<array>
+					<string>AMCategoryUtilities</string>
+				</array>
+				<key>Class Name</key>
+				<string>RunShellScriptAction</string>
+				<key>InputUUID</key>
+				<string>CAF2B2A8-D598-4E93-9284-E3A3B5C970D3</string>
+				<key>Keywords</key>
+				<array>
+					<string>Shell</string>
+					<string>Script</string>
+					<string>Command</string>
+					<string>Run</string>
+					<string>Unix</string>
+				</array>
+				<key>OutputUUID</key>
+				<string>01E3F949-4B58-44CF-8F80-C9453EF3FF37</string>
+				<key>UUID</key>
+				<string>81F36BA8-EA72-471F-B495-5BF97F337489</string>
+				<key>UnlocalizedApplications</key>
+				<array>
+					<string>Automator</string>
+				</array>
+				<key>arguments</key>
+				<dict>
+					<key>0</key>
+					<dict>
+						<key>default value</key>
+						<integer>0</integer>
+						<key>name</key>
+						<string>inputMethod</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>0</string>
+					</dict>
+					<key>1</key>
+					<dict>
+						<key>default value</key>
+						<false/>
+						<key>name</key>
+						<string>CheckedForUserDefaultShell</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>1</string>
+					</dict>
+					<key>2</key>
+					<dict>
+						<key>default value</key>
+						<string></string>
+						<key>name</key>
+						<string>source</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>2</string>
+					</dict>
+					<key>3</key>
+					<dict>
+						<key>default value</key>
+						<string></string>
+						<key>name</key>
+						<string>COMMAND_STRING</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>3</string>
+					</dict>
+					<key>4</key>
+					<dict>
+						<key>default value</key>
+						<string>/bin/sh</string>
+						<key>name</key>
+						<string>shell</string>
+						<key>required</key>
+						<string>0</string>
+						<key>type</key>
+						<string>0</string>
+						<key>uuid</key>
+						<string>4</string>
+					</dict>
+				</dict>
+				<key>isViewVisible</key>
+				<integer>1</integer>
+				<key>location</key>
+				<string>309.000000:305.000000</string>
+				<key>nibPath</key>
+				<string>/System/Library/Automator/Run Shell Script.action/Contents/Resources/Base.lproj/main.nib</string>
+			</dict>
+			<key>isViewVisible</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>connectors</key>
+	<dict/>
+	<key>workflowMetaData</key>
+	<dict>
+		<key>applicationBundleIDsByPath</key>
+		<dict/>
+		<key>applicationPaths</key>
+		<array/>
+		<key>inputTypeIdentifier</key>
+		<string>com.apple.Automator.fileSystemObject</string>
+		<key>outputTypeIdentifier</key>
+		<string>com.apple.Automator.nothing</string>
+		<key>presentationMode</key>
+		<integer>15</integer>
+		<key>processesInput</key>
+		<false/>
+		<key>serviceInputTypeIdentifier</key>
+		<string>com.apple.Automator.fileSystemObject</string>
+		<key>serviceOutputTypeIdentifier</key>
+		<string>com.apple.Automator.nothing</string>
+		<key>serviceProcessesInput</key>
+		<false/>
+		<key>systemImageName</key>
+		<string>NSActionTemplate</string>
+		<key>useAutomaticInputType</key>
+		<false/>
+		<key>workflowTypeIdentifier</key>
+		<string>com.apple.Automator.servicesMenu</string>
+	</dict>
+</dict>
+</plist>

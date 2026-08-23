@@ -3,6 +3,10 @@
 Finder Quick Action: right-click a folder → **LoC** → get the lines of code
 in a small self-dismissing result window.
 
+> Want it fancier? [**LoC Chart**](../loc-chart/) shows the same numbers
+> as a floating HUD panel with an animated per-language bar chart. Both
+> share the counting engine in this directory's `loc.sh`.
+
 ```
 LoC — my-project
 1.046 Zeilen · 10 Dateien
@@ -40,7 +44,8 @@ The same logic is available as a standalone script:
 
 ```bash
 ./loc.sh <folder>          # report on stdout, incl. per-language breakdown
-./loc.sh notify <folder>   # what the Quick Action runs
+./loc.sh notify <folder>   # what the "LoC" Quick Action runs
+./loc.sh chart <folder>    # what the "LoC Chart" Quick Action runs
 ./loc.sh help
 ```
 
@@ -70,7 +75,8 @@ None — uses only built-in tools (`find`, `awk`, `xargs`, `osascript`).
 
 ## Tests
 
-Covered by `tests/test-loc.sh` (24 tests): whitelist/prune lists, the pure
-path filter, thousands formatting, the top-language line, a fixture-tree
-end-to-end count, the self-dismissing-dialog contract, plist validity, and
-the wflow↔CLI drift guard. Run `./tests/run.sh` from the repo root.
+Covered by `tests/test-loc.sh` (30 tests): whitelist/prune lists, the pure
+path filter, thousands formatting, the top-language line, Unicode fallback
+bars, a fixture-tree end-to-end count, the self-dismissing-dialog contract,
+plist validity, and the wflow↔CLI drift guards for **both** bundles (LoC
+and LoC Chart). Run `./tests/run.sh` from the repo root.

@@ -64,7 +64,7 @@
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 export LC_NUMERIC=C
 
-LOC_VERSION="1.1.0"
+LOC_VERSION="1.2.0"
 
 # Directory names that never contain hand-written source (find -name globs).
 prune_dir_names() {
@@ -247,7 +247,59 @@ notify() {
         "$1" "$2" "$3" &gt;/dev/null 2&gt;&amp;1 || true
 }
 
-# cmd_count &lt;report|notify&gt; &lt;targets...&gt;
+# bar_of &lt;count&gt; &lt;max&gt; — 10-char Unicode block bar for the dialog fallback.
+bar_of() {
+    local count="$1" max="$2" width=10 filled bar i
+    [ "$max" -gt 0 ] 2&gt;/dev/null || max=1
+    filled=$(( (count * width + max - 1) / max ))
+    [ "$filled" -lt 1 ] &amp;&amp; filled=1
+    [ "$filled" -gt "$width" ] &amp;&amp; filled="$width"
+    bar=""
+    i=0
+    while [ "$i" -lt "$filled" ]; do bar="${bar}█"; i=$((i + 1)); done
+    while [ "$i" -lt "$width" ]; do bar="${bar}░"; i=$((i + 1)); done
+    printf '%s' "$bar"
+}
+
+# show_result &lt;name&gt; &lt;total&gt; &lt;files&gt; &lt;langs-tsv&gt; &lt;subtitle&gt; — chart mode.
+# Prefers the native loc_display panel (animated per-language bar chart,
+# built via workflows/loc-chart/build.sh); without the binary it falls
+# back to the plain dialog with Unicode block bars.
+show_result() {
+    local name="$1" total="$2" files="$3" langs="$4" subtitle="$5"
+    local tool="$HOME/Library/Services/loc_display"
+    if [ -x "$tool" ]; then
+        local -a args
+        args=(--title "LoC — ${name}" --total "$total" --files "$files")
+        local shown=0 rest=0 n l
+        while IFS=$'\t' read -r n l; do
+            [ -n "$l" ] || continue
+            if [ "$shown" -lt 5 ]; then
+                args+=(--lang "${l}=${n}")
+                shown=$((shown + 1))
+            else
+                rest=$((rest + n))
+            fi
+        done &lt;&lt;&lt; "$langs"
+        [ "$rest" -gt 0 ] &amp;&amp; args+=(--rest "$rest")
+        # nohup + &amp; so the panel outlives the Automator run — zsh HUPs
+        # background jobs on shell exit by default.
+        nohup "$tool" "${args[@]}" &gt;/dev/null 2&gt;&amp;1 &amp;
+        return 0
+    fi
+    local max body n l
+    max=$(printf '%s\n' "$langs" | head -1 | cut -f1)
+    [ -n "$max" ] || max=1
+    body=""
+    while IFS=$'\t' read -r n l; do
+        [ -n "$l" ] || continue
+        body="${body}
+$(bar_of "$n" "$max")  ${l}  $(format_number "$n")"
+    done &lt;&lt;&lt; "$langs"
+    notify "LoC — ${name}" "${subtitle}${body}" ""
+}
+
+# cmd_count &lt;report|notify|chart&gt; &lt;targets...&gt;
 cmd_count() {
     local mode="$1"
     shift
@@ -291,6 +343,8 @@ cmd_count() {
 
     if [ "$mode" = "notify" ]; then
         notify "LoC — ${name}" "$subtitle" "$top"
+    elif [ "$mode" = "chart" ]; then
+        show_result "$name" "$total" "$files" "$langs" "$subtitle"
     else
         echo "LoC — ${name}"
         echo "  ${subtitle}"

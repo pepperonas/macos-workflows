@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>A curated collection of 20 macOS Finder Quick Actions for image, text, and file workflows.</strong><br>
+  <strong>A curated collection of 21 macOS Finder Quick Actions for image, text, and file workflows.</strong><br>
   Right-click any file or select text — get useful actions in your Services menu.
 </p>
 
@@ -13,7 +13,7 @@
 
 <!-- Release / status -->
 <a href="https://github.com/pepperonas/macos-workflows/releases"><img alt="Release" src="https://img.shields.io/github/v/release/pepperonas/macos-workflows?style=flat-square&logo=github"></a>
-<a href="VERSION"><img alt="Version" src="https://img.shields.io/badge/version-1.4.0-blue?style=flat-square"></a>
+<a href="VERSION"><img alt="Version" src="https://img.shields.io/badge/version-1.5.0-blue?style=flat-square"></a>
 <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square"></a>
 <a href="CHANGELOG.md"><img alt="Changelog" src="https://img.shields.io/badge/changelog-keepachangelog-FF5733?style=flat-square"></a>
 
@@ -33,8 +33,8 @@
 <img alt="Repo size" src="https://img.shields.io/github/repo-size/pepperonas/macos-workflows?style=flat-square">
 
 <!-- Quality -->
-<img alt="Tests" src="https://img.shields.io/badge/tests-75%20passing-success?style=flat-square">
-<img alt="Workflows" src="https://img.shields.io/badge/workflows-20-blueviolet?style=flat-square">
+<img alt="Tests" src="https://img.shields.io/badge/tests-81%20passing-success?style=flat-square">
+<img alt="Workflows" src="https://img.shields.io/badge/workflows-21-blueviolet?style=flat-square">
 <img alt="Docs" src="https://img.shields.io/badge/docs-README%20per%20workflow-informational?style=flat-square">
 <img alt="Plists" src="https://img.shields.io/badge/plists-plutil%20linted-success?style=flat-square">
 <img alt="Dependencies" src="https://img.shields.io/badge/core%20deps-zero-brightgreen?style=flat-square">
@@ -111,6 +111,7 @@ Right-click any file or folder in Finder → **Quick Actions** → select the wo
 | [Cleanup Caches](workflows/cleanup-caches/) | Frees disk space with a confirmation dialog: clears macOS/npm/Gradle caches, user logs, PM2 logs (local + Raspis), runs `brew cleanup` & `npm cache clean`. Shows freed bytes as notification | None |
 | [Sleep Check](workflows/sleepcheck/) | Diagnoses why the Mac won't sleep: lists active power assertions and finds orphaned Playwright/MCP automation browsers holding a "Capturing" assertion, offering to kill them via confirmation dialog | None |
 | [LoC](workflows/loc/) | Counts source-code lines in the selected folder(s) — non-empty lines in source files only (extension whitelist), skipping `.git`, `node_modules`, venvs, build output, and minified files. Shows total, file count, and top languages in a self-dismissing result window (30 s, single OK, opens nothing). Folders only | None |
+| [LoC Chart](workflows/loc-chart/) | Same counting engine as LoC, but the result appears as a floating HUD panel with an animated per-language bar chart in language brand colors — click to dismiss, auto-closes after 30 s. Falls back to a Unicode-bar dialog without the compiled panel. Folders only | None (optional: Xcode CLI Tools for the chart panel) |
 
 ## Quick Install
 
@@ -125,11 +126,13 @@ Then for each workflow you want, double-click its `.workflow` file (or use `open
 open "workflows/cleanup-caches/Cleanup Caches.workflow"
 ```
 
-For workflows that need compilation (Remove Background, QR Code):
+For workflows that need compilation (Remove Background, QR Code, and the
+optional LoC Chart panel):
 
 ```bash
 cd workflows/remove-background && ./build.sh
 cd ../qr-code && ./build.sh
+cd ../loc-chart && ./build.sh   # optional — LoC Chart falls back to a dialog without it
 ```
 
 Enable Quick Actions under **System Settings → General → Login Items & Extensions → Finder**.

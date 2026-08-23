@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] — 2026-08-23
+
+### Added
+- **LoC Chart** — new File & Utility Quick Action (folders only): same
+  counting engine as LoC, but the result appears as a **floating HUD
+  panel** (dark blur, rounded, slides in top-right) with an **animated
+  per-language bar chart** in language brand colors (~28 mapped, fallback
+  palette otherwise), big total, file count, and a gray "Sonstige"
+  aggregate beyond the top 5. Click anywhere to dismiss (opens nothing);
+  auto-closes after 30 s. The panel is a compiled AppKit binary
+  (`loc_display.swift`, `./build.sh`, no third-party code) and runs
+  detached via `nohup … &` so Finder's spinner stops immediately.
+- **LoC Chart fallback**: without the compiled panel the Quick Action
+  still works — self-dismissing dialog with Unicode block bars
+  (`bar_of`, pure shell).
+- **loc.sh**: new `chart` subcommand (`LOC_VERSION` 1.2.0); both bundles
+  are generated from the same `QUICK ACTION CORE`, each pinned by its own
+  byte-for-byte drift-guard test.
+- 6 new tests (bar proportions/clamping, UI-free fallback rendering via
+  stubbed `notify` + empty `$HOME`, panel-preference pin, chart bundle
+  plists, chart drift guard) — suite now 81 tests.
+
 ## [1.4.0] — 2026-08-23
 
 ### Added
@@ -130,7 +152,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **File & Utility**: Copy File Path, Copy Metadata, Copy Folder Tree,
     New Textfile, Cleanup Caches
 
-[Unreleased]: https://github.com/pepperonas/macos-workflows/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/pepperonas/macos-workflows/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/pepperonas/macos-workflows/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/pepperonas/macos-workflows/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/pepperonas/macos-workflows/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/pepperonas/macos-workflows/compare/v1.1.1...v1.2.0

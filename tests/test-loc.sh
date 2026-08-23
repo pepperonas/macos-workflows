@@ -215,6 +215,76 @@ test_loc_service_targets_folders() {
     assert_contains "$out" "public.folder" "Quick Action is offered for folders"
 }
 
+# ----- bar_of (Unicode bars for the chart fallback dialog) -----
+
+test_bar_of_proportions() {
+    local rc=0
+    assert_equal "██████████" "$(bar_of 6 6)" "full bar at max" || rc=1
+    assert_equal "█████░░░░░" "$(bar_of 3 6)" "half bar rounds to 5 blocks" || rc=1
+    return $rc
+}
+
+test_bar_of_clamps() {
+    local rc=0
+    assert_equal "█░░░░░░░░░" "$(bar_of 1 1000)" "tiny share still shows one block" || rc=1
+    assert_equal "█░░░░░░░░░" "$(bar_of 0 10)" "zero count clamps UP to one block (exercises the min clamp)" || rc=1
+    assert_equal "██████████" "$(bar_of 20 6)" "count above max clamps to full" || rc=1
+    assert_equal "██████████" "$(bar_of 5 0)" "max 0 does not divide by zero" || rc=1
+    return $rc
+}
+
+# ----- chart mode: native panel preferred, dialog fallback -----
+
+# Fallback rendering tested WITHOUT UI: notify is stubbed, HOME points to an
+# empty tempdir so the loc_display binary is "not installed". Runs in a $()
+# subshell, so the stub never leaks into other tests.
+test_chart_fallback_renders_bars() {
+    local out rc=0
+    out=$(
+        HOME=$(mktemp -d)
+        notify() { printf '%s\n---\n%s' "$1" "$2"; }
+        show_result "proj" 9 4 "$(printf '6\tJavaScript\n3\tPython\n')" "9 Zeilen · 4 Dateien"
+    )
+    assert_contains "$out" "LoC — proj" "fallback keeps the title" || rc=1
+    assert_contains "$out" "█" "fallback body contains block bars" || rc=1
+    assert_contains "$out" "JavaScript" "fallback body lists languages" || rc=1
+    assert_contains "$out" "9 Zeilen · 4 Dateien" "fallback keeps the summary line" || rc=1
+    return $rc
+}
+
+test_chart_prefers_native_panel() {
+    local core rc=0
+    core=$(sed -n '/^# --- BEGIN QUICK ACTION CORE ---$/,/^# --- END QUICK ACTION CORE ---$/p' \
+        "$REPO_ROOT/workflows/loc/loc.sh" | grep -v '^[[:space:]]*#')
+    assert_contains "$core" "loc_display" "chart mode calls the panel binary" || rc=1
+    assert_contains "$core" "nohup" "panel is detached so it outlives the Automator run" || rc=1
+    return $rc
+}
+
+test_chart_service_targets_folders() {
+    local out rc=0
+    out=$(cat "$REPO_ROOT/workflows/loc-chart/LoC Chart.workflow/Contents/Info.plist")
+    assert_contains "$out" "LoC Chart" "menu entry is named LoC Chart" || rc=1
+    assert_contains "$out" "public.folder" "offered for folders" || rc=1
+    return $rc
+}
+
+test_chart_wflow_embeds_core_verbatim() {
+    local shf="$REPO_ROOT/workflows/loc/loc.sh"
+    local wf="$REPO_ROOT/workflows/loc-chart/LoC Chart.workflow/Contents/document.wflow"
+    local core expected actual
+    core=$(sed -n '/^# --- BEGIN QUICK ACTION CORE ---$/,/^# --- END QUICK ACTION CORE ---$/p' "$shf" | sed '1d;$d')
+    expected="${core}
+
+cmd_count chart \"\$@\""
+    actual=$(sed -n '/<key>ActionParameters<\/key>/,$p' "$wf" \
+        | sed -n '/<key>COMMAND_STRING<\/key>/,/<\/string>/p' \
+        | sed '1d' \
+        | sed -e 's/^[[:space:]]*<string>//' -e 's|</string>$||' \
+        | sed -e 's/&gt;/>/g' -e 's/&lt;/</g' -e 's/&amp;/\&/g')
+    assert_equal "$expected" "$actual" "embedded LoC Chart script matches loc.sh core"
+}
+
 # ----- result window contract -----
 # The result is a self-dismissing dialog, NOT display notification: macOS
 # gives scripts no control over a banner's duration, its "Einblenden"
