@@ -215,6 +215,25 @@ test_loc_service_targets_folders() {
     assert_contains "$out" "public.folder" "Quick Action is offered for folders"
 }
 
+# ----- result window contract -----
+# The result is a self-dismissing dialog, NOT display notification: macOS
+# gives scripts no control over a banner's duration, its "Einblenden"
+# button, or what a click opens. Pinned against the comment-free core so
+# this very comment cannot satisfy the check.
+
+test_notify_is_self_dismissing_dialog() {
+    local core rc=0
+    core=$(sed -n '/^# --- BEGIN QUICK ACTION CORE ---$/,/^# --- END QUICK ACTION CORE ---$/p' \
+        "$REPO_ROOT/workflows/loc/loc.sh" | grep -v '^[[:space:]]*#')
+    assert_contains "$core" "giving up after" "dialog self-dismisses" || rc=1
+    assert_contains "$core" "display dialog" "result uses a dialog" || rc=1
+    if [[ "$core" == *"display notification"* ]]; then
+        echo "    ✗ display notification crept back into the core"
+        rc=1
+    fi
+    return $rc
+}
+
 # ----- drift guard: embedded script == QUICK ACTION CORE of loc.sh -----
 # The document.wflow is generated from loc.sh; this re-derives both sides.
 # COMMAND_STRING appears twice in the wflow (empty AMParameterProperties

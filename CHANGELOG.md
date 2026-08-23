@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] — 2026-08-23
+
+### Added
+- **README.md for every workflow** — all 20 workflows now ship their own
+  documentation (behavior, example output, how it works, requirements,
+  install caveat). Previously only 6 had one.
+- **Repo-wide invariants suite** `tests/test-repo.sh` (13 tests): every
+  workflow dir has a `.workflow` bundle (catches the `open`-install
+  move-out) and a README, all plists pass `plutil -lint`, service menu
+  names are unique, every service declares input types, `python3` scripts
+  export a Homebrew-aware PATH, Automator version is pinned, and the root
+  README's workflow count, version badge, tests badge, and `CHANGELOG.md`
+  all agree with reality — a stale badge fails the suite.
+- **LoC**: contract test pinning the self-dismissing result dialog
+  (checked against comment-free source).
+- README: badges for Zsh, top language, code size, repo size,
+  contributors, commit activity, per-workflow docs, and plist linting;
+  Testing section now documents the three coverage layers.
+- `tests/README.md`: test-layer overview and a "pitfalls" section
+  (comment-free pins, mutate-every-new-pin, the double `COMMAND_STRING`
+  in `.wflow` files).
+- `CLAUDE.md`: LoC core-embedding pattern, bundle-recovery procedure,
+  notification-vs-dialog rule, repo-invariant conventions.
+
+### Changed
+- **LoC**: result is now a **self-dismissing dialog** (30 s, single OK
+  button) instead of `display notification` — macOS gives scripts no
+  control over a banner's duration, its hover "Einblenden" button, or
+  what a click opens (Script Editor). The dialog stays readable, and
+  dismissing it opens nothing. (`LOC_VERSION` 1.1.0)
+
+### Fixed
+- README claimed 18 (then 19) workflows while the repo contains 20 — an
+  off-by-one dating back to 1.0.0 ("17 Quick Actions" listing 18 items).
+  `test_repo_readme_count_matches_dirs` now pins the claim to the actual
+  directory count.
+- **New Textfile**: the `.workflow` bundle was missing from the repo —
+  a past `open`-install had *moved* it to `~/Library/Services/` and it
+  was never restored. Recovered from the installed copy; the new
+  `test_repo_every_workflow_has_bundle` guards against a repeat.
+
 ## [1.3.0] — 2026-08-23
 
 ### Added
@@ -89,7 +130,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **File & Utility**: Copy File Path, Copy Metadata, Copy Folder Tree,
     New Textfile, Cleanup Caches
 
-[Unreleased]: https://github.com/pepperonas/macos-workflows/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/pepperonas/macos-workflows/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/pepperonas/macos-workflows/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/pepperonas/macos-workflows/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/pepperonas/macos-workflows/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/pepperonas/macos-workflows/compare/v1.1.0...v1.1.1

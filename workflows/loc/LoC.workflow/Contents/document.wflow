@@ -64,7 +64,7 @@
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 export LC_NUMERIC=C
 
-LOC_VERSION="1.0.0"
+LOC_VERSION="1.1.0"
 
 # Directory names that never contain hand-written source (find -name globs).
 prune_dir_names() {
@@ -230,12 +230,19 @@ top_langs_line() {
     printf '%s' "$out"
 }
 
-# notify &lt;title&gt; &lt;subtitle&gt; &lt;message&gt; — args go through AppleScript argv,
-# so folder names with quotes/backslashes need no escaping.
+# notify &lt;title&gt; &lt;subtitle&gt; &lt;message&gt; — result window. Deliberately a
+# "display dialog ... giving up after" instead of "display notification":
+# macOS gives scripts NO control over a banner's duration, its hover
+# "Einblenden" button, or what a click opens (Script Editor). The dialog
+# stays 30 s (or until OK), has a single OK button, and opens nothing.
+# Args go through AppleScript argv, so folder names with quotes and
+# backslashes need no escaping.
 notify() {
     osascript \
         -e 'on run argv' \
-        -e 'display notification (item 3 of argv) with title (item 1 of argv) subtitle (item 2 of argv) sound name "Glass"' \
+        -e 'set body to item 2 of argv' \
+        -e 'if item 3 of argv is not "" then set body to body &amp; return &amp; return &amp; item 3 of argv' \
+        -e 'display dialog body with title (item 1 of argv) buttons {"OK"} default button "OK" with icon note giving up after 30' \
         -e 'end run' \
         "$1" "$2" "$3" &gt;/dev/null 2&gt;&amp;1 || true
 }

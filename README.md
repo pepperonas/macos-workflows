@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>A curated collection of 19 macOS Finder Quick Actions for image, text, and file workflows.</strong><br>
+  <strong>A curated collection of 20 macOS Finder Quick Actions for image, text, and file workflows.</strong><br>
   Right-click any file or select text — get useful actions in your Services menu.
 </p>
 
@@ -13,7 +13,7 @@
 
 <!-- Release / status -->
 <a href="https://github.com/pepperonas/macos-workflows/releases"><img alt="Release" src="https://img.shields.io/github/v/release/pepperonas/macos-workflows?style=flat-square&logo=github"></a>
-<a href="VERSION"><img alt="Version" src="https://img.shields.io/badge/version-1.3.0-blue?style=flat-square"></a>
+<a href="VERSION"><img alt="Version" src="https://img.shields.io/badge/version-1.4.0-blue?style=flat-square"></a>
 <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square"></a>
 <a href="CHANGELOG.md"><img alt="Changelog" src="https://img.shields.io/badge/changelog-keepachangelog-FF5733?style=flat-square"></a>
 
@@ -23,14 +23,20 @@
 <a href="https://support.apple.com/guide/automator/"><img alt="Automator" src="https://img.shields.io/badge/Automator-Quick%20Actions-8B5CF6?style=flat-square&logo=apple&logoColor=white"></a>
 
 <!-- Languages / tooling -->
-<a href="https://www.gnu.org/software/bash/"><img alt="Bash" src="https://img.shields.io/badge/Bash-5%2B-1f425f?style=flat-square&logo=gnu-bash&logoColor=white"></a>
+<a href="https://www.gnu.org/software/bash/"><img alt="Bash" src="https://img.shields.io/badge/Bash-3.2%2B-1f425f?style=flat-square&logo=gnu-bash&logoColor=white"></a>
+<img alt="Zsh" src="https://img.shields.io/badge/Zsh-5%2B-F15A24?style=flat-square&logo=zsh&logoColor=white">
 <a href="https://swift.org/"><img alt="Swift" src="https://img.shields.io/badge/Swift-5.9%2B-F05138?style=flat-square&logo=swift&logoColor=white"></a>
 <a href="https://www.python.org/"><img alt="Python" src="https://img.shields.io/badge/Python-3.9%2B-3776AB?style=flat-square&logo=python&logoColor=white"></a>
 <img alt="AppleScript" src="https://img.shields.io/badge/AppleScript-native-orange?style=flat-square">
+<img alt="Top language" src="https://img.shields.io/github/languages/top/pepperonas/macos-workflows?style=flat-square">
+<img alt="Code size" src="https://img.shields.io/github/languages/code-size/pepperonas/macos-workflows?style=flat-square">
+<img alt="Repo size" src="https://img.shields.io/github/repo-size/pepperonas/macos-workflows?style=flat-square">
 
 <!-- Quality -->
-<img alt="Tests" src="https://img.shields.io/badge/tests-61%20passing-success?style=flat-square">
-<img alt="Workflows" src="https://img.shields.io/badge/workflows-19-blueviolet?style=flat-square">
+<img alt="Tests" src="https://img.shields.io/badge/tests-75%20passing-success?style=flat-square">
+<img alt="Workflows" src="https://img.shields.io/badge/workflows-20-blueviolet?style=flat-square">
+<img alt="Docs" src="https://img.shields.io/badge/docs-README%20per%20workflow-informational?style=flat-square">
+<img alt="Plists" src="https://img.shields.io/badge/plists-plutil%20linted-success?style=flat-square">
 <img alt="Dependencies" src="https://img.shields.io/badge/core%20deps-zero-brightgreen?style=flat-square">
 <img alt="Telemetry" src="https://img.shields.io/badge/telemetry-none-success?style=flat-square">
 <img alt="Privacy" src="https://img.shields.io/badge/privacy-100%25%20local-success?style=flat-square">
@@ -41,6 +47,8 @@
 <a href="https://github.com/pepperonas/macos-workflows/issues"><img alt="Issues" src="https://img.shields.io/github/issues/pepperonas/macos-workflows?style=flat-square"></a>
 <a href="https://github.com/pepperonas/macos-workflows/pulls"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square"></a>
 <a href="https://github.com/pepperonas/macos-workflows/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/pepperonas/macos-workflows?style=flat-square"></a>
+<a href="https://github.com/pepperonas/macos-workflows/graphs/contributors"><img alt="Contributors" src="https://img.shields.io/github/contributors/pepperonas/macos-workflows?style=flat-square"></a>
+<a href="https://github.com/pepperonas/macos-workflows/commits/main"><img alt="Commit activity" src="https://img.shields.io/github/commit-activity/m/pepperonas/macos-workflows?style=flat-square"></a>
 <img alt="Maintained" src="https://img.shields.io/badge/Maintained-yes-green.svg?style=flat-square">
 <img alt="Made with ♥" src="https://img.shields.io/badge/made%20with-%E2%99%A5-red?style=flat-square">
 
@@ -102,7 +110,7 @@ Right-click any file or folder in Finder → **Quick Actions** → select the wo
 | [New Textfile](workflows/new-textfile/) | Creates `Untitled.txt` in the current folder and opens it in the default editor | None |
 | [Cleanup Caches](workflows/cleanup-caches/) | Frees disk space with a confirmation dialog: clears macOS/npm/Gradle caches, user logs, PM2 logs (local + Raspis), runs `brew cleanup` & `npm cache clean`. Shows freed bytes as notification | None |
 | [Sleep Check](workflows/sleepcheck/) | Diagnoses why the Mac won't sleep: lists active power assertions and finds orphaned Playwright/MCP automation browsers holding a "Capturing" assertion, offering to kill them via confirmation dialog | None |
-| [LoC](workflows/loc/) | Counts source-code lines in the selected folder(s) — non-empty lines in source files only (extension whitelist), skipping `.git`, `node_modules`, venvs, build output, and minified files. Shows total, file count, and top languages as a notification. Folders only | None |
+| [LoC](workflows/loc/) | Counts source-code lines in the selected folder(s) — non-empty lines in source files only (extension whitelist), skipping `.git`, `node_modules`, venvs, build output, and minified files. Shows total, file count, and top languages in a self-dismissing result window (30 s, single OK, opens nothing). Folders only | None |
 
 ## Quick Install
 
@@ -168,24 +176,39 @@ Running tests...
 
 test-cleanup-caches
   ✓ test_bytes_to_human_zero
-  ✓ test_bytes_to_human_1kb
   ✓ test_bytes_to_human_1gb
   ...
-test-sleepcheck
-  ✓ test_parse_blockers_keeps_process_lines
-  ✓ test_classify_capturing
+test-loc
+  ✓ test_report_counts_fixture
+  ✓ test_wflow_embeds_core_verbatim
+  ...
+test-repo
+  ✓ test_repo_every_workflow_has_bundle
+  ✓ test_repo_version_matches_readme_badge
   ...
 ─────────────────────────
-All 61 tests passed.
+All 75 tests passed.
 ```
 
 The runner discovers every `tests/test-*.sh` file and executes each
 `test_*` function defined inside. Helpers `assert_equal`, `assert_contains`,
 and `assert_success` are exported from `tests/run.sh`.
 
-Workflows are tested by sourcing their shell script (the `cleanup-caches.sh`
-file uses a `BASH_SOURCE != $0` guard to suppress its `main` when sourced).
-Plist files are validated via `plutil -lint`.
+Three layers of coverage:
+
+1. **Unit tests** — workflows with a standalone script (`cleanup-caches`,
+   `sleepcheck`, `loc`) are sourced and their pure functions tested against
+   fixtures (a `BASH_SOURCE != $0` guard suppresses `main` when sourced).
+2. **Drift guards** — LoC's Quick Action script is embedded from a marked
+   core block in `loc.sh`; a test re-derives the embedded script from the
+   source and fails if the `.wflow` ever diverges.
+3. **Repo invariants** (`tests/test-repo.sh`) — every bundle passes
+   `plutil -lint`, every workflow has a README and is linked from this
+   file, service menu names are unique, `python3` scripts export a
+   Homebrew-aware PATH, and the version/tests badges, `VERSION`, and
+   `CHANGELOG.md` all agree with reality. A stale badge fails the suite.
+
+See [`tests/README.md`](tests/README.md) for the test authoring guide.
 
 ## Versioning
 

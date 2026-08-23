@@ -45,12 +45,45 @@ fi
 
 ## Conventions
 
-- One file per workflow: `test-<workflow-name>.sh`
+- One file per workflow: `test-<workflow-name>.sh`; repo-wide invariants
+  live in `test-repo.sh`
 - Tests should be deterministic — use `mktemp -d` for filesystem tests,
   not real `$HOME` paths
 - Smoke tests (running the script as a subprocess) are fine for integration
   coverage; pure-function tests are preferred for fast feedback
 - Plist validation (`plutil -lint`) belongs in tests too
+- Helper functions in test files must NOT start with `test_` (the runner
+  would execute them); prefix them with `_` instead
+
+## Test layers
+
+1. **Unit tests** (`test-cleanup-caches.sh`, `test-sleepcheck.sh`,
+   `test-loc.sh`) — pure functions of the standalone scripts, fixtures
+   via `mktemp -d`, subprocess smoke tests for `help`/`version`.
+2. **Drift guards** — where a `.wflow` embeds a script that also exists
+   as a standalone file (LoC), a test re-derives the embedded script from
+   the source markers and compares byte-for-byte
+   (`test_wflow_embeds_core_verbatim`). Editing one side without the
+   other turns the suite red.
+3. **Repo invariants** (`test-repo.sh`) — docs-sync pins: every workflow
+   dir has a bundle (catches the `open`-install move-out) and a README,
+   all plists lint, menu names are unique, README badges / `VERSION` /
+   `CHANGELOG.md` agree with reality.
+
+## Pitfalls (learned the hard way)
+
+- **Pin behavior against comment-free source.** A test asserting
+  "X was removed" or "Y is used" must strip comments first — otherwise
+  the comment *explaining* the change satisfies the check and the test
+  is green even when the code regresses
+  (see `test_notify_is_self_dismissing_dialog`).
+- **Mutate every new pin once.** Re-introduce the bug (or corrupt the
+  generated artifact) and watch the test fail before trusting it. A test
+  you have never seen red is not an assertion.
+- **`COMMAND_STRING` appears twice in a `.wflow`** — first as an empty
+  `AMParameterProperties` declaration, then with the real script under
+  `ActionParameters`. Extraction must anchor on the `ActionParameters`
+  block, or you get XML fragments instead of the script.
 
 ## Example
 

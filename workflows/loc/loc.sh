@@ -3,7 +3,7 @@
 #
 # Usage:
 #   loc.sh <folder-or-file> [...]   Print a report to stdout
-#   loc.sh notify <folder> [...]    Count + show a macOS notification
+#   loc.sh notify <folder> [...]    Count + show the result window (Quick Action)
 #   loc.sh version | help
 #
 # What counts:
@@ -25,7 +25,7 @@ set -u
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 export LC_NUMERIC=C
 
-LOC_VERSION="1.0.0"
+LOC_VERSION="1.1.0"
 
 # Directory names that never contain hand-written source (find -name globs).
 prune_dir_names() {
@@ -191,12 +191,19 @@ top_langs_line() {
     printf '%s' "$out"
 }
 
-# notify <title> <subtitle> <message> — args go through AppleScript argv,
-# so folder names with quotes/backslashes need no escaping.
+# notify <title> <subtitle> <message> — result window. Deliberately a
+# "display dialog ... giving up after" instead of "display notification":
+# macOS gives scripts NO control over a banner's duration, its hover
+# "Einblenden" button, or what a click opens (Script Editor). The dialog
+# stays 30 s (or until OK), has a single OK button, and opens nothing.
+# Args go through AppleScript argv, so folder names with quotes and
+# backslashes need no escaping.
 notify() {
     osascript \
         -e 'on run argv' \
-        -e 'display notification (item 3 of argv) with title (item 1 of argv) subtitle (item 2 of argv) sound name "Glass"' \
+        -e 'set body to item 2 of argv' \
+        -e 'if item 3 of argv is not "" then set body to body & return & return & item 3 of argv' \
+        -e 'display dialog body with title (item 1 of argv) buttons {"OK"} default button "OK" with icon note giving up after 30' \
         -e 'end run' \
         "$1" "$2" "$3" >/dev/null 2>&1 || true
 }
