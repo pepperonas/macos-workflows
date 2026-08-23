@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] — 2026-08-23
+
+### Added
+- **LoC** — new File & Utility Quick Action (folders only) that counts
+  source-code lines in the selected folder(s) and shows the result as a
+  macOS notification: total non-empty lines, file count, and the top 3
+  languages. Only files with a source-code extension count; VCS/dependency/
+  build dirs (`.git`, `node_modules`, `venv`, `dist`, `build`, `vendor`, …)
+  and minified/bundled files (`*.min.js`, `*.bundle.js`) are skipped.
+  Comments count, blank lines don't. Zero dependencies (`find` + `awk`).
+- **LoC**: standalone `loc.sh` CLI with a per-language breakdown report,
+  plus `notify`, `version`, and `help` subcommands.
+- **LoC**: the Quick Action script is embedded from a marked
+  `QUICK ACTION CORE` block in `loc.sh` (bash 3.2 + zsh compatible);
+  a drift-guard test re-derives the embedded script from `loc.sh` and
+  fails if the two ever diverge.
+- 23 unit tests for LoC (whitelist/prune lists, pure path filter, thousands
+  formatting, top-language line, fixture-tree end-to-end counts, plist
+  validity, wflow↔CLI drift guard) — suite now 61 tests.
+
 ## [1.2.0] — 2026-06-17
 
 ### Added
@@ -69,7 +89,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **File & Utility**: Copy File Path, Copy Metadata, Copy Folder Tree,
     New Textfile, Cleanup Caches
 
-[Unreleased]: https://github.com/pepperonas/macos-workflows/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/pepperonas/macos-workflows/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/pepperonas/macos-workflows/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/pepperonas/macos-workflows/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/pepperonas/macos-workflows/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/pepperonas/macos-workflows/compare/v1.0.0...v1.1.0
