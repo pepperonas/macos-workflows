@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] — 2026-08-30
+
+### Added
+- **Rename Tracks** — new File & Utility Quick Action (folders only):
+  normalises music filenames to one convention, `Artist - Title.ext`.
+  Title case with small words kept lowercase (`The Look Of Love` →
+  `The Look of Love`), `ALL CAPS` artists un-shouted, download clutter
+  removed (`(Official Video)`, YouTube IDs, ` - Topic`), `ft.`/`featuring`
+  normalised to `(feat. X)`, and typographic characters mapped to ASCII
+  (acute accent as apostrophe, fullwidth comma) so the names survive
+  Windows/Android sync. A preview dialog lists every planned change before
+  anything is touched, and each run writes a hidden `.rename-log-*.tsv`
+  that `--undo` replays backwards.
+- Non-English titles are protected by a stop-word guard (`wie`, `dos`,
+  `elle`, `och` …), so `An Tagen wie diesen` and `Entre dos tierras` keep
+  their spelling. Names with more than one ` - ` are reported as ambiguous
+  and deliberately left alone rather than guessed.
+- The logic lives in `rename-tracks.py` (Python standard library only — no
+  venv, runs on the `/usr/bin/python3` macOS ships) and is embedded
+  byte-identically into the `.wflow` by `build-wflow.py --write`, so the
+  Quick Action works without this repo. A drift guard pins both copies.
+- `Tracks umbenennen.command`, a double-clickable Finder launcher for the
+  same flow, for people who prefer the tool next to the music.
+- 14 new tests (95 total): plist lint, folder-only input, PATH export,
+  UUIDs distinct from the LoC template, the embedded-copy drift guard, and
+  the shell control flow driven through a stubbed `osascript` (confirm,
+  cancel, nothing-to-do, non-folder input).
+
+### Fixed
+- The acronym rule ("keep ALL CAPS up to four letters") also fired inside a
+  fully shouted name, so `PINK FLOYD` became `PINK Floyd` and `DAFT PUNK`
+  / `THE WHO` stayed shouted entirely. A name that is uppercase *as a whole*
+  is now un-shouted word by word, with a small `AKRONYME` whitelist
+  (`DJ`, `MTV`, `USA` …) surviving it. Found by an end-to-end run of the
+  Quick Action, not by the unit tests — those had only mixed-case fixtures.
+
 ## [1.5.0] — 2026-08-23
 
 ### Added

@@ -167,3 +167,25 @@ test_repo_tests_badge_matches_suite() {
     badge=$(sed -n 's/.*badge\/tests-\([0-9][0-9]*\)%20passing.*/\1/p' "$REPO_ROOT/README.md" | head -1)
     assert_equal "$actual" "$badge" "README tests badge matches test function count"
 }
+
+# A .workflow bundle holds exactly Contents/document.wflow + Contents/Info.plist.
+# Stray files creep in easily: PlistBuddy CREATES a plist when the path it is
+# given does not exist, so a single typo leaves an empty Info.plist at the
+# bundle root that macOS ignores and review misses.
+test_repo_bundles_have_no_stray_files() {
+    local bundle rel found=0
+    while IFS= read -r bundle; do
+        while IFS= read -r rel; do
+            case "$rel" in
+                ./Contents/document.wflow|./Contents/Info.plist) ;;
+                # Automator writes a QuickLook thumbnail into some bundles.
+                ./Contents/QuickLook/Thumbnail.png) ;;
+                *)
+                    echo "    ✗ stray file in bundle: ${bundle#$REPO_ROOT/}/${rel#./}"
+                    found=1
+                    ;;
+            esac
+        done < <(cd "$bundle" && find . -type f -not -name '.DS_Store')
+    done < <(find "$REPO_ROOT/workflows" -maxdepth 2 -name '*.workflow' -type d)
+    return $found
+}
